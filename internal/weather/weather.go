@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"net"
 	"net/http"
 	"os"
 	"strconv"
@@ -123,6 +122,8 @@ type WeatherService struct {
 	Localizer       localization.Localizer
 	// DefaultLocation is the fallback when no location can be determined.
 	DefaultLocation string
+	// trust holds the proxy CIDRs whose forwarding headers are honoured.
+	trust *proxyTrust
 }
 
 // NewWeatherService initializes a new pipeline based on the provided options.
@@ -152,33 +153,6 @@ func NewWeatherService(
 	}
 }
 
-// Helper to get the "best guess" client IP — handles proxies/load balancers
-func getClientIP(r *http.Request) string {
-	// Order of preference: X-Forwarded-For (first non-proxy IP), X-Real-IP, RemoteAddr
-	if forwarded := r.Header.Get("X-Forwarded-For"); forwarded != "" {
-		// X-Forwarded-For can be "client-ip, proxy1, proxy2, ..."
-		// Take the leftmost (original client) — but in production you should trust only known proxies
-		parts := strings.Split(forwarded, ",")
-		if len(parts) > 0 {
-			ip := strings.TrimSpace(parts[0])
-			if ip != "" {
-				return ip
-			}
-		}
-	}
-
-	if realIP := r.Header.Get("X-Real-IP"); realIP != "" {
-		return strings.TrimSpace(realIP)
-	}
-
-	// Fallback to direct connection (may be proxy/load-balancer IP)
-	host, _, err := net.SplitHostPort(r.RemoteAddr)
-	if err == nil {
-		return host
-	}
-	return r.RemoteAddr // worst case
-}
-
 // WeatherHandler handles weather requests with proper cache coalescing.
 func (s *WeatherService) WeatherHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -196,7 +170,7 @@ func (s *WeatherService) WeatherHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	cacheKey := buildCacheKey(r)
+	cacheKey := buildCacheKey(r, s.resolveClientIP(r))
 
 	// Fast path: cache hit
 	if entry := s.Cacher.Get(cacheKey); entry != nil {
@@ -270,7 +244,7 @@ func (s *WeatherService) computeResponse(
 ) (*domain.CacheEntry, error) {
 	debugRequested := r.URL.Query().Get("debug") != ""
 
-	clientIP := getClientIP(r)
+	clientIP := s.resolveClientIP(r)
 
 	// ── Determine location string ────────────────────────────────────────
 	start := time.Now()

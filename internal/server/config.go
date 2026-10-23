@@ -16,6 +16,18 @@ type Config struct {
 	// === Modern multi-certificate configuration ===
 	// Preferred way for multiple domains / wildcards.
 	TLSCerts []TLSCertConfig `yaml:"tlsCerts,omitempty"`
+
+	// TrustedProxies lists the CIDRs of reverse proxies whose
+	// X-Forwarded-For / X-Real-IP headers may be trusted.
+	//
+	// Empty (the default) means no proxy is trusted and the client IP comes
+	// from RemoteAddr — correct when the service is exposed directly, and the
+	// only safe default, since forwarding headers are client-controlled.
+	//
+	// Behind a reverse proxy on the same host, set:
+	//   trustedProxies: ["127.0.0.1/32", "::1/128"]
+	// In a container network, use the network CIDR, e.g. ["172.17.0.0/16"].
+	TrustedProxies []string `yaml:"trustedProxies,omitempty"`
 }
 
 // TLSCertConfig defines one certificate + its matching domain(s).

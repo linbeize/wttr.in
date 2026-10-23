@@ -55,5 +55,12 @@ logging:
 server:
     portHttp: 8080
     portHttps: 8443
+    # Reverse proxy support: forwarding headers are trusted only from these
+    # CIDRs. Empty means "trust RemoteAddr only", which is the safe default
+    # for a directly exposed service. Same-host proxy: loopback below.
+    # See doc/reverse-proxy.md.
+    trustedProxies:
+        - 127.0.0.1/32
+        - ::1/128
     tlsCertFile: /wttr.in/etc/fullchain.pem
     tlsKeyFile: /wttr.in/etc/privkey.pem

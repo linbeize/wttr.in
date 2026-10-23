@@ -196,6 +196,12 @@ func srv(configFile string) error {
 	)
 	ws.DefaultLocation = cfg.DefaultLocation()
 
+	// Behind a reverse proxy the client IP only exists in a forwarded header,
+	// and those headers are client-controlled unless the peer is trusted.
+	if cfg.Server != nil {
+		ws.SetTrustedProxies(cfg.Server.TrustedProxies)
+	}
+
 	return server.Serve(cfg.Server, cfg.Logging, ws)
 }
 

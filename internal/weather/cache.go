@@ -52,12 +52,17 @@ type Cacher interface {
 // All entries within the same interval share the same key.
 const DefaultCacheInterval = 1 * time.Hour
 
-// buildCacheKey generates a cache signature very similar to original wttr.in logic
-func buildCacheKey(r *http.Request) string {
+// buildCacheKey generates a cache signature very similar to original wttr.in logic.
+//
+// clientIP must come from the service's proxy-aware resolver: the key is what
+// separates one user's auto-detected location from another's, so deriving it
+// from a spoofable header would let a single request poison the cached
+// result for an arbitrary client.
+func buildCacheKey(r *http.Request, clientIP string) string {
 	ua := r.Header.Get("User-Agent")
 	host := r.Host
 	uri := r.RequestURI
-	ip := getClientIP(r)
+	ip := clientIP
 	lang := r.Header.Get("Accept-Language")
 
 	// Bucket the current time by the interval

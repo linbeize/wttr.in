@@ -12,7 +12,7 @@ wttr.in 是一个面向命令行的天气预报服务，支持多种信息呈现
 
 线上服务见：[wttr.in](https://wttr.in)。
 
-[文档](https://wttr.in/:help) | [用法](#用法) | [单行输出](#单行输出) | [数据丰富输出格式-v2](#数据丰富输出格式-v2) | [地图视图](#地图视图-v3) | [输出格式](#其他输出格式) | [月相](#月相) | [国际化与本地化](#国际化与本地化) | [安装部署](#安装部署)
+[文档](https://wttr.in/:help) | [用法](#用法) | [单行输出](#单行输出) | [数据丰富输出格式-v2](#数据丰富输出格式-v2) | [地图视图](#地图视图-v3) | [输出格式](#其他输出格式) | [月相](#月相) | [国际化与本地化](#国际化与本地化) | [安装部署](#安装部署) | [反向代理](#反向代理)
 
 ## 用法
 
@@ -720,6 +720,11 @@ site:
 
 server:
   portHttp: 8080
+  # 反向代理：只有来自这些网段的 X-Forwarded-For / X-Real-IP 才可信
+  # 代理与服务同机填回环；容器部署填容器网段。留空则完全忽略转发头。
+  trustedProxies:
+    - 127.0.0.1/32
+    - ::1/128
   # portHttps: 8443
   # tlsCertFile: /wttr.in/etc/fullchain.pem
   # tlsKeyFile: /wttr.in/etc/privkey.pem
@@ -738,6 +743,43 @@ sudo -u wttr ./bin/srv srv config.yaml
 现在就可以通过 `http://你的服务器:8080` 访问自己的实例了（例如 `http://你的服务器:8080/London`）。
 
 生产环境建议配一个 systemd 服务。缓存与日志分别位于 `/wttr.in/cache` 和 `/wttr.in/log`。
+
+## 反向代理
+
+放在 nginx / Caddy / 宝塔面板后面时，**必须配置 `trustedProxies`**，否则基于 IP 的自动定位
+要么失效、要么可被伪造。
+
+原因：经过代理后 `RemoteAddr` 是代理地址，真实客户端 IP 只在 `X-Forwarded-For`
+或 `X-Real-IP` 里，而这两个头客户端可以自己伪造。原实现直接取 `X-Forwarded-For`
+最左值，攻击者加一个头就能伪造定位；且 nginx 的 `$proxy_add_x_forwarded_for` 是**追加**语义，
+头部会变成 `伪造值, 真实IP`，取最左值拿到的正是伪造值。
+
+现在只有直接对端命中 `trustedProxies` 时才解析转发头，并从**右往左**取第一个不属于
+可信代理的地址——代理逐跳追加，最右的不可信地址才是代理真正看到的客户端。
+
+```yaml
+server:
+  portHttp: 8901
+  trustedProxies:
+    - 127.0.0.1/32      # 代理同机
+    - ::1/128
+```
+
+nginx 侧（关键两行）：
+
+```nginx
+proxy_set_header Host $host;                              # 语言子域靠它
+proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+```
+
+完整说明（nginx / Caddy / 宝塔 / HTTPS 两种做法 / 语言子域 / 排错）见
+[doc/reverse-proxy.md](doc/reverse-proxy.md)。
+
+排查时加 `?debug=true`，正文会输出解析出的 IP 与定位结果：
+
+```bash
+curl "http://127.0.0.1:8901/?debug=true"
+```
 
 ## 致谢
 
