@@ -1,12 +1,42 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ .Lang }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>wttr.in — Weather Report</title>
+    <title>wttr.in — {{ .Title }}</title>
     <link rel="stylesheet" type="text/css"
           href="https://adobe-fonts.github.io/source-code-pro/source-code-pro.css">
     <style>
+        /* ── Terminal grid normalization ─────────────────────────────────
+           The report is laid out in fixed character cells, so every glyph
+           must occupy exactly 1 cell (2 for CJK). A single font cannot do
+           that: DejaVu Sans Mono covers ASCII but has no braille glyphs
+           (the v2 plots), and CJK fallbacks are proportional.
+
+           Splitting the ranges and rescaling each to the ASCII advance makes
+           ASCII : braille : CJK = 1 : 1 : 2, which keeps every box aligned
+           regardless of which family the browser actually resolves. */
+        @font-face {
+            font-family: "WTTR Mono";
+            src: local("DejaVu Sans Mono"), local("Liberation Mono");
+            unicode-range: U+0000-27FF, U+2900-FFFF;
+        }
+        @font-face {
+            font-family: "WTTR Mono";
+            /* Braille comes from a proportional fallback: shrink to 1 cell. */
+            src: local("DejaVu Sans");
+            unicode-range: U+2800-28FF;
+            size-adjust: 82.2%;
+        }
+        @font-face {
+            font-family: "WTTR Mono";
+            /* CJK: force exactly two ASCII cells. */
+            src: local("WenQuanYi Zen Hei"), local("Noto Sans CJK SC"),
+                 local("Microsoft YaHei"), local("PingFang SC");
+            unicode-range: U+2E80-9FFF, U+3000-303F, U+FF00-FF60, U+FFE0-FFE6;
+            size-adjust: 118%;
+        }
+
         html, body {
             margin: 0;
             padding: 0;
@@ -17,13 +47,12 @@
         .term-container {
             background: #000000;
             color: #bbbbbb;
-            font-family: "Source Code Pro",
+            font-family: "WTTR Mono",
+                         "Source Code Pro",
                          "DejaVu Sans Mono",
                          Menlo,
-                         "Lucida Sans Typewriter",
                          "Lucida Console",
                          monaco,
-                         "Bitstream Vera Sans Mono",
                          monospace;
             font-size: 11.8px;
             line-height: 1.30 !important;
@@ -62,9 +91,8 @@
             height: 6px;
         }
 
-        .github-button,
-        .twitter-follow-button {
-            white-space: nowrap;        /* important for GitHub & Twitter widgets */
+        .github-button {
+            white-space: nowrap;
             flex-shrink: 0;             /* prevent individual buttons from shrinking */
         }
     </style>
@@ -75,39 +103,22 @@
     </div>
     {{- if not .Query.Options.NoFollowLine }}
     <div class="social-buttons">
-        <a href="https://twitter.com/igor_chubin?ref_src=twsrc%5Etfw" 
-           class="twitter-follow-button" 
-           data-show-count="false">Follow @igor_chubin</a>
-
-        <a aria-label="Star chubin/wttr.in on GitHub" 
-           data-count-aria-label="# stargazers on GitHub" 
-           data-count-api="/repos/chubin/wttr.in#stargazers_count" 
-           data-count-href="/chubin/wttr.in/stargazers" 
-           data-show-count="true" 
-           data-icon="octicon-star" 
-           href="https://github.com/chubin/wttr.in" 
+        <a aria-label="Star linbeize/wttr.in on GitHub"
+           data-count-aria-label="# stargazers on GitHub"
+           data-count-api="/repos/linbeize/wttr.in#stargazers_count"
+           data-count-href="/linbeize/wttr.in/stargazers"
+           data-show-count="true"
+           data-icon="octicon-star"
+           href="https://github.com/linbeize/wttr.in"
            class="github-button">wttr.in</a>
 
-        <a aria-label="Star schachmat/wego on GitHub" 
-           data-count-aria-label="# stargazers on GitHub" 
-           data-count-api="/repos/schachmat/wego#stargazers_count" 
-           data-count-href="/schachmat/wego/stargazers" 
-           data-show-count="true" 
-           data-icon="octicon-star" 
-           href="https://github.com/schachmat/wego" 
-           class="github-button">wego</a>
+        <a href="https://github.com/schachmat/wego"
+           class="github-button" aria-label="wego">wego</a>
 
-        <a aria-label="Star chubin/pyphoon on GitHub" 
-           data-count-aria-label="# stargazers on GitHub" 
-           data-count-api="/repos/chubin/pyphoon#stargazers_count" 
-           data-count-href="/chubin/pyphoon/stargazers" 
-           data-show-count="true" 
-           data-icon="octicon-star" 
-           href="https://github.com/chubin/pyphoon" 
-           class="github-button">pyphoon</a>
+        <a href="https://github.com/chubin/pyphoon"
+           class="github-button" aria-label="pyphoon">pyphoon</a>
     </div>
 
-    <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
     <script async defer id="github-bjs" src="https://buttons.github.io/buttons.js"></script>
     {{ end }}
 </body>

@@ -36,4 +36,4 @@ heideck
 │ [38;5;226m    /   \    [0m 0.0 mm | 0%[0m    │               0.0 mm | 0%[0m    │
 └──────────────────────────────┴──────────────────────────────┘
 
-Follow [46m[30m@igor_chubin[0m for wttr.in updates
+Follow [46m[30m@linbeize[0m for wttr.in updates

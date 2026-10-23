@@ -37,4 +37,4 @@ Weather report: heideck
 └──────────────────────────────┴──────────────────────────────┴──────────────────────────────┴──────────────────────────────┘
 Location: Heideck, Landkreis Roth, Bayern, 91180, Deutschland [49.1336509,11.124544]
 
-Follow [46m[30m@igor_chubin[0m for wttr.in updates
+Follow [46m[30m@linbeize[0m for wttr.in updates

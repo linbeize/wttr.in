@@ -1,9 +1,9 @@
 {
-  "NOT_FOUND_MESSAGE": "\nWe were unable to find your location\nso we have brought you to Oymyakon,\none of the coldest permanently inhabited locales on the planet.\n",
-  "UNKNOWN_LOCATION": "Unknown location",
-  "LOCATION": "Location",
-  "CAPACITY_LIMIT_REACHED": "\nSorry, we are running out of queries to the weather service at the moment.\nHere is the weather report for the default city (just to show you what it looks like).\nWe will get new queries as soon as possible.\nYou can follow https://x.com/igor_chubin for the updates.\n======================================================================================\n",
-  "NEW_FEATURE": "New feature: multilingual location names \u001b[92mwttr.in/станция+Восток\u001b[0m (in UTF-8) and location search \u001b[92mwttr.in/~Kilimanjaro\u001b[0m (just add ~ before)",
-  "FOLLOW_ME": "Follow \u001b[46m\u001b[30m@igor_chubin\u001b[0m for wttr.in updates",
+  "NOT_FOUND_MESSAGE": "\n未能找到您指定的地点，\n已为您切换到奥伊米亚康（Oymyakon）——\n这个星球上最寒冷的人类定居点。\n",
+  "UNKNOWN_LOCATION": "未知地点",
+  "LOCATION": "地点",
+  "CAPACITY_LIMIT_REACHED": "\n抱歉，天气服务的查询配额暂时用尽。\n以下显示默认城市的天气预报（仅供演示效果）。\n我们会尽快补充新的配额。\n最新进展请关注 https://github.com/linbeize/wttr.in\n======================================================================================\n",
+  "NEW_FEATURE": "新功能：支持多语言地点名 \u001b[92mwttr.in/станция+Восток\u001b[0m（UTF-8），以及地点检索 \u001b[92mwttr.in/~Kilimanjaro\u001b[0m（在名称前加 ~）",
+  "FOLLOW_ME": "关注 \u001b[46m\u001b[30m@linbeize\u001b[0m 获取 wttr.in 更新",
   "CAPTION_WEATHER_REPORT_FOR": "天气预报："
 }

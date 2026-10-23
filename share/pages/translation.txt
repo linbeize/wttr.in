@@ -84,6 +84,4 @@ In the not likely case wttr.in is not yet translated in your language
 you can help with the translation.
 Please start with one of the following steps:
 
-    * Open a GitHub issue: github.com/chubin/wttr.in
-    * Write an email to igor@chub.in
-    * Write PM or tweet to igor_chubin
+    * Open a GitHub issue: github.com/linbeize/wttr.in

@@ -9,9 +9,13 @@ Originally started as a small project, a wrapper for [wego](https://github.com/s
 intended to demonstrate the power of the console-oriented services,
 *wttr.in* became a popular weather reporting service, handling tens of millions[¹](#wttrin-usage-stats) of queries daily.
 
+> **This fork** (`linbeize/wttr.in`) is a Simplified-Chinese localization of the
+> original `chubin/wttr.in`, with the IP database switched to the China-accurate
+> **bt.cn-ip** mmdb. See [改造说明.md](改造说明.md) for the full list of changes.
+
 You can see it running here: [wttr.in](https://wttr.in).
 
-[Documentation](https://wttr.in/:help) | [Usage](https://github.com/chubin/wttr.in#usage) | [One-line output](https://github.com/chubin/wttr.in#one-line-output) | [Data-rich output format](https://github.com/chubin/wttr.in#data-rich-output-format-v2) | [Map view](https://github.com/chubin/wttr.in#map-view-v3) | [Output formats](https://github.com/chubin/wttr.in#different-output-formats) | [Moon phases](https://github.com/chubin/wttr.in#moon-phases) | [Internationalization](https://github.com/chubin/wttr.in#internationalization-and-localization) | [Installation](https://github.com/chubin/wttr.in#installation)
+[Documentation](https://wttr.in/:help) | [Usage](https://github.com/linbeize/wttr.in#usage) | [One-line output](https://github.com/linbeize/wttr.in#one-line-output) | [Data-rich output format](https://github.com/linbeize/wttr.in#data-rich-output-format-v2) | [Map view](https://github.com/linbeize/wttr.in#map-view-v3) | [Output formats](https://github.com/linbeize/wttr.in#different-output-formats) | [Moon phases](https://github.com/linbeize/wttr.in#moon-phases) | [Internationalization](https://github.com/linbeize/wttr.in#internationalization-and-localization) | [Installation](https://github.com/linbeize/wttr.in#installation)
 
 ## Usage
 
@@ -646,7 +650,7 @@ For automated IPs resolution:
 ### Build the Binary
 
 ```bash
-git clone https://github.com/chubin/wttr.in.git
+git clone https://github.com/linbeize/wttr.in.git
 cd wttr.in
 
 # Build-time fonts (embedded in final binary)
