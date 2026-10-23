@@ -1,60 +1,70 @@
 用法：
 
     $ curl wttr.in          # 当前位置
-    $ curl wttr.in/pek      # 机场三字码
+    $ curl wttr.in/muc      # 慕尼黑机场的天气
+    $ curl wttr.is          # 完全等价的备用域名
 
-支持的位置类型：
+支持的地点类型：
 
     /paris                  # 城市名称
-    /~Eiffel+tower          # 任意地点
-    /北京                    # 任意语言的任意地点
-    /PEK                    # 机场三字码
+    /Eiffel+tower           # 任意地点（空格用 + 代替）
+    /北京                    # 任意语言的任意地点名称
+    /muc                    # 机场三字码
     /@stackoverflow.com     # 域名
-    /94107                  # 区域代码
-    /-78.46,106.79          # GPS 坐标
+    /94107                  # 邮编／区域代码
+    /-78.46,106.79          # GPS 坐标（纬度,经度）
 
-特殊位置：
+月相信息：
 
-    /moon                   # 月相（加上 ,+US 或 ,+France 以查看特定城市的月相）
-    /moon@2016-10-25        # 特定日期的月相（@2016-10-25）
+    /moon                   # 月相（加上 ,+US 或 ,+France 可查看该城市的月相）
+    /moon@2016-10-25        # 指定日期的月相
 
 单位：
 
-    m                       # 公制（国际单位制）（除美国外该单位制为默认值）
-    u                       # USCS（美国默认单位制）
-    M                       # 以米/秒为单位显示风速
+    m                       # 公制（国际单位制，除美国外为默认）
+    u                       # USCS（美国惯用单位，美国默认）
+    M                       # 风速以米/秒显示
 
 查看选项：
 
     0                       # 仅当前天气
-    1                       # 当前天气 + 未来 1 天
-    2                       # 当前天气 + 未来 2 天
-    A                       # 忽略用户代理(User-Agent)并强制使用 ANSI 输出格式（终端模式）
-    F                       # 不显示「关注」(Follow)那行
-    n                       # 较窄模式（仅日夜）
-    q                       # 简练模式（无「天气预报」文字）
-    Q                       # 极简模式（无「天气预报」、无城市名称）
+    1                       # 当前天气 + 今天预报
+    2                       # 当前天气 + 今天 + 明天预报
+    A                       # 忽略 User-Agent，强制 ANSI 输出（终端样式）
+    d                       # 仅使用标准控制台字形
+    F                       # 不显示「关注」那一行
+    n                       # 窄版（只显示白天与夜间）
+    q                       # 静默版（不显示「天气预报」标题）
+    Q                       # 超静默版（不显示标题，也不显示城市名）
     T                       # 关闭终端转义序列（无颜色）
 
 PNG 选项：
 
-    /paris.png              # 生成 PNG 文件
-    p                       # 在输出图像周围增加缩进空白
+    /paris.png              # 生成 PNG 图片
+    p                       # 在输出周围加内边距
     t                       # 透明度 150
-    transparency=...        # 透明度从 0 到 255（255 = 不透明）
+    transparency=...        # 透明度 0–255（255 表示不透明）
+    background=...          # 背景色，RRGGBB 形式，例如 00aaaa
 
-可合并使用的选项
+选项可以组合使用：
 
     /Paris?0pq
     /Paris?0pq&lang=fr
-    /Paris_0pq.png          # PNG 文件模式中在下划线 _ 后指定选项
-    /Rome_0pq_lang=it.png   # 用下划线分隔长选项
+    /Paris_0pq.png          # PNG 模式下选项写在 _ 之后
+    /Rome_0pq_lang=it.png   # 长选项之间用下划线分隔
+
+备用域名：
+
+    $ curl wttr.is          # wttr.is 是 wttr.in 的完全等价备用域名
+    $ curl wttr.is/London   # 可直接替换使用
 
 本地化：
 
     $ curl fr.wttr.in/Paris
     $ curl wttr.in/paris?lang=fr
-    $ curl -H "Accept-Language: fr" wttr.in/paris
+    $ curl wttr.in/paris?lang=zh-cn      # 简体中文
+    $ curl wttr.in/paris?lang=zh-tw      # 繁体中文
+    $ curl -H "Accept-Language: zh-CN" wttr.in/paris
 
 支持的语言：
 
@@ -63,7 +73,6 @@ PNG 选项：
 
 特殊 URL：
 
-    /:help                  # 显示此页面
-    /:bash.function         # 显示建议的 bash 函数 wttr()
+    /:help                  # 显示本页
+    /:bash.function         # 显示推荐的 bash 函数 wttr()
     /:translation           # 显示翻译者信息
-

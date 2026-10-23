@@ -41,6 +41,27 @@ type Config struct {
 
 	// Renderer configures how responses are rendered (subprocess renderers, templates, etc.)
 	Renderer *renderer.Config `yaml:"renderer"`
+
+	// Site holds site-wide defaults (language, fallback location).
+	Site *SiteConfig `yaml:"site"`
+}
+
+// DefaultLang returns the configured site language, or "en" when unset.
+func (c *Config) DefaultLang() string {
+	if c == nil || c.Site == nil || c.Site.DefaultLang == "" {
+		return "en"
+	}
+
+	return c.Site.DefaultLang
+}
+
+// DefaultLocation returns the configured fallback location, or "" when unset.
+func (c *Config) DefaultLocation() string {
+	if c == nil || c.Site == nil {
+		return ""
+	}
+
+	return c.Site.DefaultLocation
 }
 
 // LoadFromYAML loads configuration from a YAML file and returns a pointer to Config

@@ -15,6 +15,9 @@ import (
 // strictQueryParser implements QueryParser using the existing options.ParseQueryString
 type strictQueryParser struct {
 	config *defs.WttrInOptions
+
+	// defaultLang is applied when the request expresses no language preference.
+	defaultLang string
 }
 
 // NewQueryParser returns a new QueryParser that uses the provided configuration
@@ -22,7 +25,23 @@ func NewQueryParser(config *defs.WttrInOptions) weather.QueryParser {
 	if config == nil {
 		panic("config must not be nil")
 	}
+
 	return &strictQueryParser{config: config}
+}
+
+// WithDefaultLang sets the site-wide default language and returns the parser.
+//
+// Kept as a builder method so the existing constructor signature (and every
+// caller/test) stays untouched.
+func WithDefaultLang(p weather.QueryParser, lang string) weather.QueryParser {
+	sp, ok := p.(*strictQueryParser)
+	if !ok {
+		return p
+	}
+
+	sp.defaultLang = lang
+
+	return sp
 }
 
 // Parse implements QueryParser.Parse
@@ -35,7 +54,7 @@ func (p *strictQueryParser) Parse(ctx context.Context, r *http.Request, ipOpts *
 		return nil, err
 	}
 
-	requestOpts, err := FromRequest(r)
+	requestOpts, err := FromRequest(r, p.defaultLang)
 	if err != nil {
 		return nil, err
 	}

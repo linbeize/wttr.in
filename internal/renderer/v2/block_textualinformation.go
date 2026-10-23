@@ -3,6 +3,7 @@ package v2
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -22,9 +23,21 @@ func dimLabel(label string) string {
 	return dim + label + reset
 }
 
+// ansiEscape matches CSI/color sequences emitted by the renderers.
+var ansiEscape = regexp.MustCompile(`\x1b\[[0-9;]*m`)
+
 // displayWidth returns the number of columns a string occupies on a terminal.
 // It correctly handles emojis, wide characters, combining characters, etc.
+//
+// ANSI escape sequences are stripped first: they occupy zero cells, but the
+// previous implementation counted every byte of "\x1b[38;2;255;100;100m" as
+// a visible column, which made any colored line look ~20 cells wider than it
+// is and destroyed both the diagram frame and the metadata alignment.
 func displayWidth(s string) int {
+	if strings.ContainsRune(s, '\x1b') {
+		s = ansiEscape.ReplaceAllString(s, "")
+	}
+
 	width := 0
 	for i := 0; i < len(s); {
 		r, size := utf8.DecodeRuneInString(s[i:])
@@ -84,12 +97,12 @@ type section []field
 // textualInformation returns the rich bottom metadata block (data-first)
 func textualInformation(q *domain.Query, loc *domain.Location, opts *options.Options, l10n localization.L10n) string {
 	if q.Weather == nil || len(*q.Weather) == 0 {
-		return simpleTextualFallback(loc)
+		return simpleTextualFallback(loc, l10n)
 	}
 
 	data, err := oneline.ParseCurrentCondition(*q.Weather)
 	if err != nil {
-		return simpleTextualFallback(loc)
+		return simpleTextualFallback(loc, l10n)
 	}
 
 	ctx := &oneline.RenderContext{
@@ -219,9 +232,11 @@ func buildLocationString(loc *domain.Location) string {
 	return b.String()
 }
 
-// simpleTextualFallback
-func simpleTextualFallback(loc *domain.Location) string {
-	return dimLabel("Weather: ") + "???\n" +
-		dimLabel("Timezone: ") + loc.TimeZone + "\n" +
-		dimLabel("Location: ") + loc.Name + "\n"
+// simpleTextualFallback renders the metadata block when no weather data
+// is available. Labels go through the localizer so they follow the request
+// language instead of always being English.
+func simpleTextualFallback(loc *domain.Location, l10n localization.L10n) string {
+	return dimLabel(l10n.Text("WEATHER")+": ") + "???" + "\n" +
+		dimLabel(l10n.Text("TIMEZONE")+": ") + loc.TimeZone + "\n" +
+		dimLabel(l10n.Text("LOCATION")+": ") + loc.Name + "\n"
 }

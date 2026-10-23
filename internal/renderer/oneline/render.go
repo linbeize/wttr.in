@@ -2,7 +2,6 @@ package oneline
 
 import (
 	"fmt"
-	"log"
 	"math"
 	"strconv"
 	"time"
@@ -12,20 +11,19 @@ import (
 // All render functions — same signature
 // ──────────────────────────────────────────────────────────────────────────────
 
+// RenderConditionFullName returns the condition name in the requested language.
+//
+// The localization layer stores the translated name under the fixed key
+// lang_xx; the previous implementation built the path with a literal "xx"
+// language token, so the lookup always missed and silently fell back to
+// English for every non-English request.
 func RenderConditionFullName(ctx *RenderContext) string {
-	if ctx.Options.Lang == "en" {
-		return ctx.Data.WeatherDesc
+	if ctx == nil || ctx.Data == nil {
+		return ""
 	}
 
-	query := fmt.Sprintf(".current_condition[0].lang_%s[0].value", "xx")
-
-	val, err := GetStringValue(ctx.DataRaw, query)
-	if err != nil {
-		log.Printf("[ERR: renderConditionFullName: %s]", err)
-		return ctx.Data.WeatherDesc
-	}
-
-	return val
+	// ParseCurrentCondition already resolved the best translation.
+	return ctx.Data.WeatherDesc
 }
 
 func RenderConditionCode(ctx *RenderContext) string {

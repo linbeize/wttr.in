@@ -8,6 +8,7 @@ import (
 
 	"github.com/clipperhouse/displaywidth"
 
+	"github.com/chubin/wttr.in/internal/localization"
 	"github.com/chubin/wttr.in/internal/options"
 )
 
@@ -320,7 +321,10 @@ func (r *V1Renderer) formatRain(c cond, opts *options.Options) string {
 
 // formatCond builds the 5-line current/forecast condition block.
 // prefix is " " for current condition, "│" for forecast blocks inside the box.
-func (r *V1Renderer) formatCond(prefix string, c cond, isCurrent bool, opts *options.Options) []string {
+func (r *V1Renderer) formatCond(
+	prefix string, c cond, isCurrent bool, opts *options.Options,
+	l10n localization.L10n,
+) []string {
 	if opts == nil {
 		opts = &options.Options{}
 	}
@@ -348,9 +352,10 @@ func (r *V1Renderer) formatCond(prefix string, c cond, isCurrent bool, opts *opt
 		}
 	}
 
-	// Safe description handling
-	desc := "Unknown"
-	if len(c.WeatherDesc) > 0 {
+	// Safe description handling: the fallback must be localized, otherwise
+	// a missing condition field leaks an English word into a Chinese report.
+	desc := l10n.Text("UNKNOWN_LOCATION")
+	if len(c.WeatherDesc) > 0 && c.WeatherDesc[0].Value != "" {
 		desc = c.WeatherDesc[0].Value
 	}
 

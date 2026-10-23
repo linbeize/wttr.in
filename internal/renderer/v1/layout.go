@@ -37,7 +37,7 @@ func (r *V1Renderer) printDay(day weather, opts *options.Options, l10n localizat
 		// if opts.Narrow && (i == 1 || i == 2) {
 		// 	continue // skip middle slots in narrow mode
 		// }
-		blocks[i] = r.formatCond("│", slot, false, opts)
+		blocks[i] = r.formatCond("│", slot, false, opts, l10n)
 	}
 
 	// Build date header with localization

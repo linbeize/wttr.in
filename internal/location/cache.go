@@ -228,6 +228,15 @@ func (c *Cache) flushBatch(batch []*Location) {
 // Resolve returns location data — first from cache (LRU → persistent), then from external search.
 func (c *Cache) Resolve(location string) (*Location, error) {
 	defer log.Debugln("Resolve() finished")
+
+	// 0. Coordinate shortcuts ("39.9050,116.4053" / "39.9050 116.4053").
+	// IP-based auto detection lands here: the IP database already carries the
+	// coordinates, so geocoding them would only add latency and failure modes.
+	// Coordinates are stateless, so they are not cached.
+	if lat, lon, ok := parseCoordinates(location); ok {
+		return ResolveCoordinates(lat, lon)
+	}
+
 	location = normalizeLocationName(location)
 
 	// 1. Fastest path: LRU
@@ -434,6 +443,54 @@ func normalizeLocationName(name string) string {
 	name = strings.TrimSpace(name)
 	name = strings.Join(strings.Fields(name), " ")
 	return strings.ToLower(name)
+}
+
+// parseCoordinates parses "lat,lon" (also space-separated) into floats.
+//
+// The separator must be a comma or whitespace; anything else is treated as a
+// place name, so "94107" or "New York" never reach this branch by accident.
+func parseCoordinates(s string) (float64, float64, bool) {
+	s = strings.TrimSpace(s)
+	if s == "" {
+		return 0, 0, false
+	}
+
+	sep := ","
+	if !strings.Contains(s, sep) {
+		sep = "" // fall back to whitespace splitting
+	}
+
+	var fields []string
+	if sep == "," {
+		fields = strings.Split(s, sep)
+	} else {
+		fields = strings.Fields(s)
+	}
+
+	if len(fields) != 2 {
+		return 0, 0, false
+	}
+
+	lat, err := strconv.ParseFloat(strings.TrimSpace(fields[0]), 64)
+	if err != nil {
+		return 0, 0, false
+	}
+
+	lon, err := strconv.ParseFloat(strings.TrimSpace(fields[1]), 64)
+	if err != nil {
+		return 0, 0, false
+	}
+
+	if lat < -90 || lat > 90 || lon < -180 || lon > 180 {
+		return 0, 0, false
+	}
+
+	// (0,0) is the null island placeholder, not a real client location.
+	if lat == 0 && lon == 0 {
+		return 0, 0, false
+	}
+
+	return lat, lon, true
 }
 
 func mustParseFloat(s string) float64 {

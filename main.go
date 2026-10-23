@@ -84,13 +84,26 @@ func srv(configFile string) error {
 	////////////////////////////
 	// Configuring IP Locators
 	////////////////////////////
+	// Order matters: the first successful locator wins.
+	// bt.cn-ip is China-accurate but IPv4-only, so it is tried before
+	// GeoIP2 (global, IPv6-capable) and the local cache last.
 	ipLocators := []weather.IPLocator{}
+	if cfg.IP.BTGeoIP != "" {
+		btIP, err := ip.NewIPLocatorBT(cfg.IP.BTGeoIP)
+		if err != nil {
+			log.Println("bt.cn-ip initialization error (ignored):", err)
+		} else {
+			ipLocators = append(ipLocators, btIP)
+		}
+	}
+
 	if cfg.IP.GeoIP2 != "" {
 		geoIP2, err := ip.NewIPLocatorGeoIP2(cfg.IP.GeoIP2)
 		if err != nil {
-			log.Fatalln("geoip2 initialization error:", err)
+			log.Println("geoip2 initialization error (ignored):", err)
+		} else {
+			ipLocators = append(ipLocators, geoIP2)
 		}
-		ipLocators = append(ipLocators, geoIP2)
 	}
 
 	ipCache, err := ip.NewCache(cfg.IP)
@@ -166,11 +179,14 @@ func srv(configFile string) error {
 
 	// ==================== END CACHE SETUP ====================
 
+	queryParser := query.WithDefaultLang(
+		query.NewQueryParser(defs), cfg.DefaultLang())
+
 	ws := weather.NewWeatherService(
 		cachedWeatherClient,
 		weather.NewCacheLocator(locationCache),
 		ipLocators,
-		query.NewQueryParser(defs),
+		queryParser,
 		responsesCacher,
 		requestLogger,
 		uplink.NewUplinkProcessor(cfg.Uplink),
@@ -178,6 +194,7 @@ func srv(configFile string) error {
 		formatterMap,
 		localizer,
 	)
+	ws.DefaultLocation = cfg.DefaultLocation()
 
 	return server.Serve(cfg.Server, cfg.Logging, ws)
 }

@@ -2,6 +2,7 @@ package query
 
 import (
 	"fmt"
+	"net"
 	"net/http"
 	"net/url"
 	"path"
@@ -14,7 +15,11 @@ import (
 
 // FromRequest creates an options.Options struct based on the provided HTTP request.
 // It processes the URL path, domain name, and headers according to the specified rules.
-func FromRequest(r *http.Request) (*options.Options, error) {
+//
+// defaultLang is used when the request carries no language preference at all
+// (no ?lang=, no language subdomain, no Accept-Language header). Pass "" for
+// the historical English default.
+func FromRequest(r *http.Request, defaultLang string) (*options.Options, error) {
 	opts := &options.Options{}
 
 	// Step 1: Extract components from the URL path
@@ -34,12 +39,16 @@ func FromRequest(r *http.Request) (*options.Options, error) {
 
 	// Step 2: Process domain name for VIEW or LANG
 	host := r.Host
+	// Strip the port so "localhost:8080" does not become the domain prefix.
+	if h, _, splitErr := net.SplitHostPort(host); splitErr == nil {
+		host = h
+	}
+
 	domainParts := strings.SplitN(host, ".", 2)
-	if len(domainParts) > 0 {
+	if len(domainParts) == 2 {
 		domainPrefix := strings.ToLower(domainParts[0])
-		// Check if the domain prefix is a valid language code (e.g., "de" for German)
-		// Assuming a simple check for 2-letter codes for languages
-		if len(domainPrefix) == 2 && isValidLanguageCode(domainPrefix) {
+		// Region-qualified prefixes such as "zh-cn" are languages too.
+		if isValidLanguageCode(domainPrefix) {
 			opts.Lang = domainPrefix
 		} else if isValidView(domainPrefix) {
 			// Check if it's a valid view name (e.g., "v2")
@@ -89,26 +98,22 @@ func FromRequest(r *http.Request) (*options.Options, error) {
 
 	// Step 5: Set default language from header if not set by domain or URL
 	if opts.Lang == "" {
-		acceptLang := r.Header.Get("Accept-Language")
-		if acceptLang != "" {
-			// Take the first language from the Accept-Language header
-			langs := strings.Split(acceptLang, ",")
-			if len(langs) > 0 {
-				lang := strings.Split(langs[0], ";")[0]
-				lang = strings.TrimSpace(strings.ToLower(lang))
-				if len(lang) >= 2 {
-					lang = lang[:2] // Take first two letters (e.g., "en" from "en-US")
-					if isValidLanguageCode(lang) {
-						opts.Lang = lang
-					}
-				}
-			}
+		if lang := languageFromAcceptLanguage(r.Header.Get("Accept-Language")); lang != "" {
+			opts.Lang = lang
 		}
 	}
 	// Default language if still unset
 	if opts.Lang == "" {
+		opts.Lang = defaultLang
+	}
+
+	if opts.Lang == "" {
 		opts.Lang = "en"
 	}
+
+	// Collapse region tags onto the bundles that actually exist, so that
+	// "zh" (and "zh-Hans") get the fully translated Simplified Chinese set.
+	opts.Lang = normalizeLanguageTag(opts.Lang)
 
 	// Step 6: Set User-Agent from header. Output defaulting based on the
 	// agent is deferred to ApplyAutoFixes, where the view is known.
@@ -329,11 +334,54 @@ func Validate(opts *options.Options) error {
 	return nil
 }
 
-// isValidLanguageCode checks if the provided code is a valid 2-letter language code.
-// This is a simplified check; in a real application, you'd have a list of supported languages.
+// isValidLanguageCode checks whether code is a supported language tag.
+//
+// Two forms are accepted:
+//   - plain two-letter codes ("en", "zh", "de")
+//   - region-qualified tags used by the translation bundles
+//     ("zh-cn", "zh-tw")
+//
+// Region tags matter for Chinese: "zh" and "zh-cn" resolve to the same
+// translation, but "zh-tw" must stay distinguishable.
 func isValidLanguageCode(code string) bool {
-	// Simplified: assume any 2-letter lowercase code is a language
-	return len(code) == 2 && strings.ToLower(code) == code && !util.InSlice(code, []string{"v2", "v3"})
+	code = strings.ToLower(strings.TrimSpace(code))
+	if code == "" {
+		return false
+	}
+
+	if len(code) == 2 {
+		return code[0] >= 'a' && code[0] <= 'z' && code[1] >= 'a' && code[1] <= 'z'
+	}
+
+	// Region-qualified: exactly "xx-yy".
+	if len(code) == 5 && code[2] == '-' {
+		return isValidLanguageCode(code[:2]) &&
+			code[3] >= 'a' && code[3] <= 'z' &&
+			code[4] >= 'a' && code[4] <= 'z'
+	}
+
+	return false
+}
+
+// normalizeLanguageTag expands short tags to the bundle directory name.
+//
+// Simplification: bare "zh" is served by the "zh-cn" bundle, because the
+// "zh" directory only carries message strings and would otherwise leave
+// weather conditions in English.
+func normalizeLanguageTag(code string) string {
+	code = strings.ToLower(strings.TrimSpace(code))
+	if code == "" {
+		return ""
+	}
+
+	switch code {
+	case "zh", "zh-hans", "zh-sg", "zh-cn":
+		return "zh-cn"
+	case "zh-hant", "zh-hk", "zh-mo", "zh-tw":
+		return "zh-tw"
+	}
+
+	return code
 }
 
 // isValidView checks if the provided string is a valid view name.
@@ -385,4 +433,34 @@ func isPlainTextClient(userAgent string) bool {
 	}
 
 	return false
+}
+
+// languageFromAcceptLanguage returns the highest-priority supported language
+// from an Accept-Language header.
+//
+// The previous implementation unconditionally truncated the tag to two
+// letters, which turned "zh-TW" into "zh" and silently dropped the
+// Traditional Chinese distinction. Browsers send region tags, so they are
+// preserved here and normalised later.
+func languageFromAcceptLanguage(header string) string {
+	for _, part := range strings.Split(header, ",") {
+		// Strip the quality weight: "zh-CN;q=0.9" → "zh-CN".
+		tag := strings.TrimSpace(strings.SplitN(part, ";", 2)[0])
+		tag = strings.ToLower(tag)
+		if tag == "" {
+			continue
+		}
+
+		if isValidLanguageCode(tag) {
+			return tag
+		}
+
+		// "en-US-x-private" style suffixes are not supported tags; retry
+		// with the language part only.
+		if len(tag) > 2 && tag[2] == '-' && isValidLanguageCode(tag[:2]) {
+			return tag[:2]
+		}
+	}
+
+	return ""
 }

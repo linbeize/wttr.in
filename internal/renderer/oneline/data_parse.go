@@ -71,18 +71,17 @@ func ParseCurrentCondition(raw []byte) (*ParsedCurrentCondition, error) {
 	visKm, _ := strconv.ParseFloat(cc.Visibility, 64)
 
 	// ── Description (prefer translated lang_xx if present) ─────────────────────
+	// The localization layer (TranslateWeather) writes lang_xx with the
+	// condition name in the requested language while leaving weatherDesc in
+	// English. Reading lang_xx first is what makes v2/oneline output follow
+	// ?lang=xx instead of always showing the English condition name.
 	desc := ""
-	if len(cc.WeatherDesc) > 0 {
-		desc = cc.WeatherDesc[0].Value
+	if len(cc.LangXX) > 0 {
+		desc = cc.LangXX[0].Value
 	}
 
-	// Try to find any lang_ field (lang_ru, lang_de, etc.)
-	for _, v := range cc.WeatherDesc { // actually it's []ValueItem, but we check parent
-		// Note: real code might need to look at the full map or use a lang prefix search
-		// For simplicity we take the first description (usually English or requested lang)
-		if desc == "" && len(v.Value) > 0 {
-			desc = v.Value
-		}
+	if desc == "" && len(cc.WeatherDesc) > 0 {
+		desc = cc.WeatherDesc[0].Value
 	}
 
 	// ── Observation time ───────────────────────────────────────────────────────

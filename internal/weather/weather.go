@@ -9,16 +9,29 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/chubin/wttr.in/internal/domain"
 	"github.com/chubin/wttr.in/internal/localization"
+	locationpkg "github.com/chubin/wttr.in/internal/location"
 	"github.com/chubin/wttr.in/internal/options"
+	"github.com/chubin/wttr.in/internal/util"
 	"github.com/chubin/wttr.in/internal/util/termutil"
 )
 
 var ErrDataSource = errors.New("weather data source not available")
+
+// defaultFallbackLocation mirrors the historical wttr.in behaviour.
+const defaultFallbackLocation = "Berlin"
+
+// fallback location used when geocoding finds nothing: Oymyakon, the coldest
+// permanently inhabited place on the planet (same behaviour as classic wttr.in).
+const (
+	fallbackLatitude  = 63.4608
+	fallbackLongitude = 142.7858
+)
 
 // Weatherer interface to fetch weather data based on location and language.
 type Weatherer interface {
@@ -108,6 +121,8 @@ type WeatherService struct {
 	RendererMap     map[string]Renderer
 	FormatterMap    map[string]Formatter
 	Localizer       localization.Localizer
+	// DefaultLocation is the fallback when no location can be determined.
+	DefaultLocation string
 }
 
 // NewWeatherService initializes a new pipeline based on the provided options.
@@ -276,6 +291,9 @@ func (s *WeatherService) computeResponse(
 	// For testing purposes, it is possibe to simulate US-based clients
 	// by setting country code in the HTTP headers of the request.
 	if countryCode := r.Header.Get("X-Client-Country-Code"); countryCode != "" {
+		if ipData == nil {
+			ipData = &domain.IPData{IP: clientIP}
+		}
 		ipData.CountryCode = countryCode
 	}
 
@@ -301,33 +319,62 @@ func (s *WeatherService) computeResponse(
 
 	locStr := opts.Location
 
-	if ipData != nil {
-		if autoDetect {
-			if ipData.City == "" {
-				locStr = fmt.Sprintf("%s,%s", ipData.Latitude, ipData.Longitude)
-			} else {
-				locStr = fmt.Sprintf("%s, %s, %s", ipData.City, ipData.Region, ipData.CountryCode)
-				// 	log.Printf("Using old style location for: %s, %s, %s\n", ipData.City, ipData.Region, ipData.CountryCode)
-				// 	locStr = ipData.City
-			}
+	if ipData != nil && autoDetect {
+		// Prefer exact coordinates: they are what the weather API needs, and
+		// they avoid a geocoding round-trip plus all of its failure modes.
+		// Fall back to the city name only when the IP database has no coords.
+		switch {
+		case ipData.Latitude != "" && ipData.Longitude != "":
+			locStr = fmt.Sprintf("%s,%s", ipData.Latitude, ipData.Longitude)
+		case ipData.City != "":
+			locStr = util.NonEmptyStrings(", ", ipData.City, ipData.Region, ipData.CountryCode)
 		}
 	}
 	tracker.Add("Determine location string + IP lookup", time.Since(start))
 
 	if locStr == "" {
-		// Temporary use Berlin as the default location
-		locStr = "Berlin"
-		log.Println("no location could be determined")
+		locStr = s.DefaultLocation
+		if locStr == "" {
+			locStr = defaultFallbackLocation
+		}
+
+		log.Println("no location could be determined, using", locStr)
 	}
 
 	// ── Geocode ───────────────────────────────────────────────────────────
 	start = time.Now()
-	location, err := s.Locator.GetLocation(locStr)
+
+	var location *domain.Location
+
+	location, err = s.Locator.GetLocation(locStr)
+	notFoundFallback := false
+
+	// When the location came from the IP database we already know the place
+	// names. Overlay them on the geocoded result so the report reads
+	// "江苏, 常州" instead of "Lat 31.77 and Lon 119.95".
+	if autoDetect && ipData != nil {
+		if named := namedLocationFromIP(ipData, location); named != nil {
+			location = named
+			err = nil
+		}
+	}
+
 	if err != nil {
 		if opts.View == "files" || opts.View == "page" {
 			location = &domain.Location{}
 		} else {
-			return nil, fmt.Errorf("location not found: %w", err)
+			// A geocoding miss must not turn into an English 500 page.
+			// Fall back to the coldest permanently inhabited place on Earth
+			// and prepend the localized notice further down.
+			location = &domain.Location{
+				Name:        locStr,
+				FullAddress: locStr,
+				Latitude:    fallbackLatitude,
+				Longitude:   fallbackLongitude,
+				TimeZone:    locationpkg.TimezoneFor(fallbackLatitude, fallbackLongitude),
+			}
+
+			notFoundFallback = true
 		}
 	}
 	tracker.Add("Geocode location", time.Since(start))
@@ -422,6 +469,11 @@ func (s *WeatherService) computeResponse(
 			log.Println(err)
 			return nil, fmt.Errorf("format failed: %w", err)
 		}
+
+		if notFoundFallback {
+			formatOut.Content = prependNotFoundNotice(formatOut.Content, l10n, opts.Output)
+		}
+
 		tracker.Add("Render + Format", time.Since(start))
 
 		if isUpstream && (compareWithUpstream && opts.View == "line") {
@@ -582,5 +634,62 @@ func debugCompareOneLineRendering(format string, uplinkResponse string, internal
 }
 
 func isClientInUSA(ipData *domain.IPData) bool {
+	if ipData == nil {
+		return false
+	}
+
 	return ipData.CountryCode == "US"
+}
+
+// prependNotFoundNotice adds the localized "we could not find your location"
+// banner above the rendered report, matching the classic wttr.in behaviour.
+//
+// Only plain-text output is touched: HTML/PNG bodies are complete documents
+// where prepending raw text would break the markup.
+func prependNotFoundNotice(content []byte, l10n localization.L10n, output string) []byte {
+	if output == "html" || output == "png" {
+		return content
+	}
+
+	notice := l10n.Text("NOT_FOUND_MESSAGE")
+	if notice == "" {
+		return content
+	}
+
+	// The notice is defined with leading/trailing newlines already.
+	return append([]byte(notice), content...)
+}
+
+// namedLocationFromIP builds a human-readable location out of IP geodata.
+//
+// The IP database knows "江苏 / 常州 / CN"; the weather API knows the exact
+// coordinates. Combining both gives a report titled with a place name
+// instead of raw coordinates, while still querying the precise position.
+//
+// Returns nil when the IP data carries no usable name, in which case the
+// geocoder's result is kept untouched.
+func namedLocationFromIP(ipData *domain.IPData, geocoded *domain.Location) *domain.Location {
+	name := util.NonEmptyStrings(", ", ipData.City, ipData.Region)
+	if name == "" {
+		return nil
+	}
+
+	loc := *geocoded // copy: TimeZone/Lat/Lon resolved from coordinates
+
+	loc.Name = name
+	if ipData.Country != "" {
+		loc.FullAddress = util.NonEmptyStrings(", ", ipData.City, ipData.Region, ipData.Country)
+	} else {
+		loc.FullAddress = name
+	}
+
+	// Prefer the exact coordinates from the IP database when present.
+	if lat, err := strconv.ParseFloat(ipData.Latitude, 64); err == nil && ipData.Latitude != "" {
+		if lon, lonErr := strconv.ParseFloat(ipData.Longitude, 64); lonErr == nil {
+			loc.Latitude = lat
+			loc.Longitude = lon
+		}
+	}
+
+	return &loc
 }

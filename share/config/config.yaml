@@ -19,13 +19,24 @@ ip:
     ipCache: cache/ip2l
     ipCacheDb: /wttr.in/cache/geoip.db
     ipCacheType: db
+    # btGeoip: China-accurate IPv4 database (bt.cn-ip format). Consulted first.
+    # Get it from https://www.bt.cn/ (or any bt.cn-ip mirror) and point this at it.
+    btGeoip: /wttr.in/data/bt_monitor.mmdb
+    # geoip2: global fallback, also covers IPv6 (MaxMind GeoLite2-City).
     geoip2: /wttr.in/wttr.in-v2-v2/data/GeoLite2-City-20260310.mmdb
 
 geo:
     locationCache: cache/loc
     locationCacheDb: cache/geoloc.db
     locationCacheType: db
+    # Geocoders are tried in order; the first hit wins.
+    # "osm" needs no API key and honours lang, which is what makes
+    # Chinese place names ("北京", "朝阳区") resolve correctly.
     nominatim:
+        - name: osm
+          type: osm
+          url: https://nominatim.openstreetmap.org/search
+          lang: zh
         - name: opencage
           type: opencage
           url: https://api.opencagedata.com/geocode/v1/json

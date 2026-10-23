@@ -205,3 +205,5 @@
    : 附近有火山灰                                : Volcanic ash in vicinity                           :
    : 附近有发展旺盛的尘/沙旋风                   : Well-developed dust/sand whirls in vicinity        :
    : 浮尘                                        : Widespread dust                                    :
+   : 烟霾                                      : Smoky haze                                         :
+   : 雾霾                                      : Smog                                               :

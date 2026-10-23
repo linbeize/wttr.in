@@ -77,7 +77,7 @@ func convertCondFromCurrent(cc domain.CurrentCondition) cond {
 		WeatherCode:    parseInt(cc.WeatherCode),
 		WindspeedKmph:  parseInt(cc.WindspeedKmph),
 		Winddir16Point: cc.Winddir16Point,
-		WeatherDesc:    convertValueItems([]domain.ValueItem{{Value: getTranslatedDesc(cc.WeatherDesc, cc.LangXX, "Unknown")}}),
+		WeatherDesc:    convertValueItems([]domain.ValueItem{{Value: getTranslatedDesc(cc.WeatherDesc, cc.LangXX, "")}}),
 	}
 }
 
@@ -94,7 +94,7 @@ func convertCondFromHourly(h domain.Hourly) cond {
 		WindGustKmph:   parseInt(h.WindGustKmph),
 		WindspeedKmph:  parseInt(h.WindspeedKmph),
 		Winddir16Point: h.Winddir16Point,
-		WeatherDesc:    convertValueItems([]domain.ValueItem{{Value: getTranslatedDesc(h.WeatherDesc, h.LangXX, "Unknown")}}),
+		WeatherDesc:    convertValueItems([]domain.ValueItem{{Value: getTranslatedDesc(h.WeatherDesc, h.LangXX, "")}}),
 	}
 }
 

@@ -45,3 +45,165 @@
 389: 中或大雷雨                      : Moderate or heavy rain with thunder
 392: 可能會打雷的小陣雪              : Patchy light snow with thunder
 395: 可能會打雷的中或大陣雪          : Moderate or heavy snow with thunder
+   : 煙霾                                      : Smoky haze                                         :
+   : 霧霾                                      : Smog                                               :
+   : 附近有霾                                         : Haze in vicinity                                   :
+   : 大陣性雨夾雪                                       : Heavy rain and snow shower                         :
+   : 大陣雨                                          : Heavy rain shower                                  :
+   : 小毛毛雨和米雪                                      : Light drizzle and snow grains                      :
+   : 小陣雨和薄霧                                       : Light rain and mist shower                         :
+   : 小陣性霰                                         : Light small hail/snow pellets shower               :
+   : 小陣性未知降水                                      : Light unknown precipitation shower                 :
+   : 雨和霰伴雷暴                                       : Rain and small hail/snow pellets with thunderstorm :
+   : 附近有陣雪                                        : Snow shower in vicinity                            :
+   : 附近有雷暴                                        : Thundery outbreaks nearby                          :
+   : 低吹雪                                          : Low drifting snow                                  :
+   : 局部有霧                                         : Patches of fog                                     :
+   : 毛毛雨                                          : Drizzle                                            :
+   : 小毛毛雨和雨                                       : Light drizzle and rain                             :
+   : 雪                                            : Snow                                               :
+   : 雨                                            : Rain                                               :
+   : 陣雨                                           : Rain Shower                                        :
+   : 高吹沙                                          : Blowing sand                                       :
+   : 大範圍揚塵                                        : Blowing widespread dust                            :
+   : 附近有大範圍揚塵                                     : Blowing widespread dust in vicinity                :
+   : 毛毛雨和霧                                        : Drizzle and fog                                    :
+   : 毛毛雨和雨                                        : Drizzle and rain                                   :
+   : 毛毛雨和陣雨                                       : Drizzle and rain shower                            :
+   : 毛毛雨伴雷暴                                       : Drizzle with thunderstorm                          :
+   : 塵暴                                           : Dust storm                                         :
+   : 附近有霧                                         : Fog in vicinity                                    :
+   : 凍毛毛雨和雨                                       : Freezing drizzle and rain                          :
+   : 凍薄霧                                          : Freezing mist                                      :
+   : 凍雨                                           : Freezing rain                                      :
+   : 凍雨夾雪                                         : Freezing rain and snow                             :
+   : 凍結未知降水                                       : Freezing unknown precipitation                     :
+   : 附近有漏斗雲                                       : Funnel cloud in vicinity                           :
+   : 陣性冰雹                                         : Hail shower                                        :
+   : 冰雹伴雷暴                                        : Hail with thunderstorm                             :
+   : 霾                                            : Haze                                               :
+   : 強高吹雪                                         : Heavy blowing snow                                 :
+   : 強毛毛雨                                         : Heavy drizzle                                      :
+   : 強毛毛雨和雨                                       : Heavy drizzle and rain                             :
+   : 強凍結未知降水                                      : Heavy freezing unknown precipitation               :
+   : 強冰雹伴雷暴                                       : Heavy hail with thunderstorm                       :
+   : 強冰粒                                          : Heavy ice pallets                                  :
+   : 大雨和陣性冰雹                                      : Heavy rain and hail shower                         :
+   : 大雨和冰雹伴雷暴                                     : Heavy rain and hail with thunderstorm              :
+   : 大雨和陣性霰                                       : Heavy rain and small hail/snow pallets shower      :
+   : 大雨和霰伴雷暴                                      : Heavy rain and small hail/snow pallets with thunderstorm :
+   : 大雨夾雪                                         : Heavy rain and snow                                :
+   : 大雨夾雪和霰伴雷暴                                    : Heavy rain and snow and small hail/snow pallets with thunderstorm :
+   : 大雨伴雷暴                                        : Heavy rain with thunderstorm                       :
+   : 強陣性霰                                         : Heavy small hail/snow pallets shower               :
+   : 強霰伴雷暴                                        : Heavy small hail/snow pallets with thunderstorm    :
+   : 大雪和陣性霰                                       : Heavy snow and small hail/snow pallets shower      :
+   : 大雪和霰伴雷暴                                      : Heavy snow and small hail/snow pallets with thunderstorm :
+   : 大陣雪                                          : Heavy snow shower                                  :
+   : 大雪伴雷暴                                        : Heavy snow with thunderstorm                       :
+   : 冰晶                                           : Ice crystals                                       :
+   : 冰粒                                           : Ice pallets                                        :
+   : 弱高吹雪                                         : Light blowing snow                                 :
+   : 小毛毛雨和霧                                       : Light drizzle and fog                              :
+   : 小毛毛雨和冰粒                                      : Light drizzle and ice pallets                      :
+   : 小毛毛雨和雨夾雪                                     : Light drizzle and rain and snow                    :
+   : 小毛毛雨和陣雨                                      : Light drizzle and rain shower                      :
+   : 小毛毛雨和雨伴雷暴                                    : Light drizzle and rain with thunderstorm           :
+   : 小毛毛雨和雪                                       : Light drizzle and snow                             :
+   : 小毛毛雨伴雷暴                                      : Light drizzle with thunderstorm                    :
+   : 小凍毛毛雨                                        : Light freezing drizzle                             :
+   : 小凍毛毛雨和雨                                      : Light freezing drizzle and rain                    :
+   : 小凍毛毛雨和雪                                      : Light freezing drizzle and snow                    :
+   : 弱凍霧                                          : Light freezing fog                                 :
+   : 小凍雨夾雪                                        : Light freezing rain and snow                       :
+   : 小凍米雪和霧                                       : Light freezing snow grains and fog                 :
+   : 小凍結未知降水                                      : Light freezing unknown precipitation               :
+   : 小陣性冰雹                                        : Light hail shower                                  :
+   : 弱冰晶                                          : Light ice crystals                                 :
+   : 小冰粒                                          : Light ice pallets                                  :
+   : 弱低吹                                          : Light low drifting                                 :
+   : 弱低吹雪                                         : Light low drifting snow                            :
+   : 小雨和陣性冰雹                                      : Light rain and hail shower                         :
+   : 小雨和冰雹伴雷暴                                     : Light rain and hail with thunderstorm              :
+   : 小雨和冰粒                                        : Light rain and ice pallets                         :
+   : 小雨和薄霧                                        : Light rain and mist                                :
+   : 小雨和陣性霰                                       : Light rain and small hail/snow pallets shower      :
+   : 小雨和霰伴雷暴                                      : Light rain and small hail/snow pallets with thunderstorm :
+   : 小雨夾雪                                         : Light rain and snow                                :
+   : 小雨夾雪和陣性霰                                     : Light rain and snow and small hail/snow pallets shower :
+   : 小雨和米雪                                        : Light rain and snow grains                         :
+   : 小雨和陣雪                                        : Light rain and snow shower                         :
+   : 小雨夾雪伴雷暴                                      : Light rain and snow with thunderstorm              :
+   : 小雨伴雷暴                                        : Light rain with thunderstorm                       :
+   : 小陣雨                                          : Light shower                                       :
+   : 小陣性冰粒                                        : Light showers of ice pellets                       :
+   : 小霰                                           : Light small hail/snow pallets                      :
+   : 小陣性霰                                         : Light small hail/snow pallets shower               :
+   : 小霰伴雷暴                                        : Light small hail/snow pallets with thunderstorm    :
+   : 小雪和冰粒                                        : Light snow and ice pallets                         :
+   : 小雪和霰                                         : Light snow and small hail/snow pallets             :
+   : 小雪和陣性霰                                       : Light snow and small hail/snow pallets shower      :
+   : 小雪和霰伴雷暴                                      : Light snow and small hail/snow pallets with thunderstorm :
+   : 小雪和米雪                                        : Light snow and snow grains                         :
+   : 小米雪                                          : Light snow grains                                  :
+   : 小陣雪                                          : Light snow shower                                  :
+   : 小雪伴雷暴                                        : Light snow with thunderstorm                       :
+   : 弱雷暴                                          : Light thunderstorm                                 :
+   : 小未知降水                                        : Light unknown precipitation                        :
+   : 弱發展旺盛的塵/沙旋風                                  : Light well-developed dust/sand whirls              :
+   : 低吹沙                                          : Low drifting sand                                  :
+   : 大範圍低吹塵                                       : Low drifting widespread dust                       :
+   : 薄霧伴雷暴                                        : Mist with thunderstorm                             :
+   : 區域內中到大雷雨                                     : Moderate or heavy rain in area with thunder        :
+   : 區域內中到大雪伴雷                                    : Moderate or heavy snow in area with thunder        :
+   : 局部霧                                          : Partial fog                                        :
+   : 附近局部有霧                                       : Patches of fog in vicinity                         :
+   : 附近有零星凍毛毛雨                                    : Patchy freezing drizzle nearby                     :
+   : 區域內零星小雨伴雷                                    : Patchy light rain in area with thunder             :
+   : 區域內零星小雪伴雷                                    : Patchy light snow in area with thunder             :
+   : 附近有零星降雨                                      : Patchy rain nearby                                 :
+   : 附近有零星雨夾雪                                     : Patchy sleet nearby                                :
+   : 附近有零星降雪                                      : Patchy snow nearby                                 :
+   : 雨和陣性冰雹                                       : Rain and hail shower                               :
+   : 雨和冰雹伴雷暴                                      : Rain and hail with thunderstorm                    :
+   : 雨和薄霧                                         : Rain and mist                                      :
+   : 雨和薄霧伴雷暴                                      : Rain and mist with thunderstorm                    :
+   : 雨和陣性霰                                        : Rain and small hail/snow pallets shower            :
+   : 雨和霰伴雷暴                                       : Rain and small hail/snow pallets with thunderstorm :
+   : 雨夾雪                                          : Rain and snow                                      :
+   : 雨夾雪和陣性霰                                      : Rain and snow and small hail/snow pallets shower   :
+   : 雨和米雪                                         : Rain and snow grains                               :
+   : 陣性雨夾雪                                        : Rain and snow shower                               :
+   : 雨夾雪伴雷暴                                       : Rain and snow with thunderstorm                    :
+   : 附近有雨                                         : Rain in vicinity                                   :
+   : 附近有陣雨                                        : Rain shower in vicinity                            :
+   : 雨伴雷暴                                         : Rain with thunderstorm                             :
+   : 沙                                            : Sand                                               :
+   : 沙暴                                           : Sandstorm                                          :
+   : 淺霧                                           : Shallow fog                                        :
+   : 淺薄霧                                          : Shallow mist                                       :
+   : 陣雨                                           : Shower                                             :
+   : 附近有陣雨                                        : Shower in vicinity                                 :
+   : 霰                                            : Small hail/snow pallets                            :
+   : 陣性霰                                          : Small hail/snow pallets shower                     :
+   : 霰伴雷暴                                         : Small hail/snow pallets with thunderstorm          :
+   : 煙                                            : Smoke                                              :
+   : 雪和冰粒                                         : Snow and ice pallets                               :
+   : 雪和薄霧                                         : Snow and mist                                      :
+   : 雪和陣性霰                                        : Snow and small hail/snow pellets shower            :
+   : 雪和霰伴雷暴                                       : Snow and small hail/snow pallets with thunderstorm :
+   : 雪和米雪                                         : Snow and snow grains                               :
+   : 米雪                                           : Snow grains                                        :
+   : 陣雪                                           : Snow shower                                        :
+   : 雪伴雷暴                                         : Snow with thunderstorm                             :
+   : 颮                                            : Squalls                                            :
+   : 雷暴                                           : Thunderstorm                                       :
+   : 附近有雷暴                                        : Thunderstorm in vicinity                           :
+   : 附近有雷暴                                        : Thundery outbreaks in nearby                       :
+   : 未知降水                                         : Unknown precipitation                              :
+   : 陣性未知降水                                       : Unknown precipitation shower                       :
+   : 未知降水伴雷暴                                      : Unknown precipitation with thunderstorm            :
+   : 火山灰                                          : Volcanic ash                                       :
+   : 附近有火山灰                                       : Volcanic ash in vicinity                           :
+   : 附近有發展旺盛的塵/沙旋風                                : Well-developed dust/sand whirls in vicinity        :
+   : 浮塵                                           : Widespread dust                                    :

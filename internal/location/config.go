@@ -9,5 +9,11 @@ type Config struct {
 		Type  string `yaml:"type"`
 		URL   string `yaml:"url"`
 		Token string `yaml:"token"`
+		// Lang is the preferred result language (accept-language) for
+		// geocoders that support it, e.g. "zh" for Nominatim.
+		Lang string `yaml:"lang"`
 	} `yaml:"nominatim"`
+	// CoordinatesOnly skips geocoding entirely and treats the location
+	// string as "lat,lon" when it parses as a coordinate pair.
+	CoordinatesOnly bool `yaml:"coordinatesOnly"`
 }

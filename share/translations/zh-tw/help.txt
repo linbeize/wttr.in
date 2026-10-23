@@ -1,60 +1,70 @@
-使用方法
+用法：
 
     $ curl wttr.in          # 目前位置
     $ curl wttr.in/muc      # 慕尼黑機場的天氣
+    $ curl wttr.is          # 完全等價的備用網域
 
-支援的位置類型：
+支援的地點類型：
 
     /paris                  # 城市名稱
-    /~Eiffel+tower          # 任意地點
-    /Москва                 # 任意地點在任何語言的 Unicode 名稱
-    /muc                    # 機場代碼（3個字母）
+    /Eiffel+tower           # 任意地點（空格以 + 代替）
+    /台北                    # 任意語言的任意地點名稱
+    /muc                    # 機場三字碼
     /@stackoverflow.com     # 網域名稱
-    /94107                  # 區域代碼
-    /-78.46,106.79          # GPS 座標
+    /94107                  # 郵遞區號／區域代碼
+    /-78.46,106.79          # GPS 座標（緯度,經度）
 
-特殊位置：
+月相資訊：
 
-    /moon                   # 月相（加入 ,+US 或 ,+France 來觀看這些地方的月相）
-    /moon@2016-10-25        # 特定日期的月相 (@2016-10-25)
+    /moon                   # 月相（加上 ,+US 或 ,+France 可觀看該城市的月相）
+    /moon@2016-10-25        # 指定日期的月相
 
 單位：
 
-    m                       # 公制（國際單位制）（除了美國以外的地方皆預設使用此單位制）
-    u                       # USCS（美國預設使用）
-    M                       # 以公尺／秒為單位顯示風速
+    m                       # 公制（國際單位制，除美國外為預設）
+    u                       # USCS（美國慣用單位，美國預設）
+    M                       # 風速以公尺／秒顯示
 
 檢視選項：
 
-    0                       # 僅目前的天氣
-    1                       # 目前的天氣+未來1天
-    2                       # 目前的天氣+未來2天
-    A                       # 忽略使用者代理字串並強制使用 ANSI 輸出格式（終端機）
-    F                       # 不要顯示「追蹤」那行
-    n                       # 窄版（僅日夜）
-    q                       # 安靜版（無「天氣報告」文字）
-    Q                       # 超安靜版（無「天氣報告」、無城市名稱）
-    T                       # 關閉終端機序列（無色彩）
+    0                       # 僅目前天氣
+    1                       # 目前天氣 + 今日預報
+    2                       # 目前天氣 + 今日 + 明日預報
+    A                       # 忽略 User-Agent，強制 ANSI 輸出（終端樣式）
+    d                       # 僅使用標準主控台字元
+    F                       # 不顯示「追蹤」那一行
+    n                       # 窄版（只顯示白天與夜間）
+    q                       # 安靜版（不顯示「天氣報告」標題）
+    Q                       # 超安靜版（不顯示標題，也不顯示城市名稱）
+    T                       # 關閉終端逸出序列（無色彩）
 
 PNG 選項：
 
-    /paris.png              # 生成 PNG 檔案
-    p                       # 在輸出周圍新增框架
+    /paris.png              # 產生 PNG 圖片
+    p                       # 在輸出周圍加上內距
     t                       # 透明度 150
-    transparency=...        # 透明度從 0 到 255（255 = 不透明）
+    transparency=...        # 透明度 0–255（255 表示不透明）
+    background=...          # 背景色，RRGGBB 格式，例如 00aaaa
 
-可合併使用的選項
+選項可以合併使用：
 
     /Paris?0pq
     /Paris?0pq&lang=fr
-    /Paris_0pq.png          # PNG 檔案模式於 _ 後指定
-    /Rome_0pq_lang=it.png   # 以底線分隔長選項
+    /Paris_0pq.png          # PNG 模式下選項寫在 _ 之後
+    /Rome_0pq_lang=it.png   # 長選項之間以下底線分隔
+
+備用網域：
+
+    $ curl wttr.is          # wttr.is 是 wttr.in 的完全等價備用網域
+    $ curl wttr.is/London   # 可直接替換使用
 
 在地化：
 
     $ curl fr.wttr.in/Paris
     $ curl wttr.in/paris?lang=fr
-    $ curl -H "Accept-Language: fr" wttr.in/paris
+    $ curl wttr.in/paris?lang=zh-cn      # 簡體中文
+    $ curl wttr.in/paris?lang=zh-tw      # 繁體中文
+    $ curl -H "Accept-Language: zh-TW" wttr.in/paris
 
 支援的語言：
 
@@ -63,7 +73,6 @@ PNG 選項：
 
 特殊 URL：
 
-    /:help                  # 顯示此頁面
+    /:help                  # 顯示本頁
     /:bash.function         # 顯示建議的 bash 函式 wttr()
-    /:translation           # 顯示關於譯者的資訊
-
+    /:translation           # 顯示翻譯者資訊

@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
-	"unicode/utf8"
 
 	"github.com/chubin/wttr.in/internal/domain"
 	"github.com/chubin/wttr.in/internal/localization"
@@ -108,6 +107,12 @@ func (r *V2Renderer) Render(q domain.Query, localizer localization.Localizer) (d
 // Remaining drawing functions (not in helpers.go)
 // ===================================================================
 
+// addFrame draws the outer box around the diagram block.
+//
+// Padding is computed from the *display* width, not from len() (bytes) or the
+// rune count: CJK text such as "天气预报： 北京" occupies two terminal cells
+// per rune, and the braille plot glyphs are wide too. Measuring them as bytes
+// made every Chinese frame overflow and lose its right border.
 func addFrame(content string, width int, opts *options.Options, l10n localization.L10n) string {
 	if opts.NoCaption {
 		return content
@@ -115,10 +120,11 @@ func addFrame(content string, width int, opts *options.Options, l10n localizatio
 
 	lines := strings.Split(strings.TrimRight(content, "\n"), "\n")
 	for i := range lines {
-		spacesNumber := width - len(lines[i])
+		spacesNumber := width - displayWidth(lines[i])
 		if spacesNumber < 0 {
 			spacesNumber = 0
 		}
+
 		lines[i] = "│" + lines[i] + strings.Repeat(" ", spacesNumber) + "│"
 	}
 
@@ -136,7 +142,14 @@ func addFrame(content string, width int, opts *options.Options, l10n localizatio
 		caption = "┤ " + title + " ├"
 	}
 
-	frameTop := "┌" + caption + strings.Repeat("─", width-utf8.RuneCountInString(caption)) + "┐\n"
+	// Caption cells are consumed from the top border; clamp so that a long
+	// caption can never produce a negative repeat count.
+	fill := width - displayWidth(caption)
+	if fill < 0 {
+		fill = 0
+	}
+
+	frameTop := "┌" + caption + strings.Repeat("─", fill) + "┐\n"
 
 	return frameTop + strings.Join(lines, "\n") + "\n" +
 		"└" + strings.Repeat("─", width) + "┘\n"

@@ -90,7 +90,7 @@ func (r *V1Renderer) Render(query domain.Query, localizer localization.Localizer
 	// Current condition
 	current := data.CurrentCondition[0]
 	cond := convertCurrentConditionToCond(current)
-	condLines := r.formatCond("", cond, true, opts)
+	condLines := r.formatCond("", cond, true, opts, l10n)
 
 	// Build output using strings.Builder directly
 	var sb strings.Builder
@@ -179,7 +179,7 @@ func convertCurrentConditionToCond(cc domain.CurrentCondition) cond {
 		WindspeedKmph:  parseInt(cc.WindspeedKmph),
 		Winddir16Point: cc.Winddir16Point,
 		WeatherDesc: []struct{ Value string }{
-			{Value: getTranslatedDesc(cc.WeatherDesc, cc.LangXX, "Unknown")},
+			{Value: getTranslatedDesc(cc.WeatherDesc, cc.LangXX, "")},
 		},
 	}
 
