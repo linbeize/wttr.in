@@ -1,0 +1,67 @@
+[Unit]
+Description=wttr.in weather service (Chinese localization)
+Documentation=https://github.com/linbeize/wttr.in
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=wttr
+Group=wttr
+WorkingDirectory=/wttr.in
+
+# 二进制用法是 `srv srv <config>`：第一个 srv 是子命令，第二个是配置路径
+ExecStart=/wttr.in/bin/srv srv /wttr.in/etc/config.yaml
+
+Restart=always
+RestartSec=3s
+
+# 冷请求要拉上游天气 API，停机时给正在处理的请求留出收尾时间
+TimeoutStopSec=20s
+KillSignal=SIGTERM
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=wttr
+
+# ── 沙箱与加固 ────────────────────────────────────────────────
+# 服务只写自己的 cache/log，其余文件系统一律只读
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+ProtectProc=invisible
+RestrictSUIDSGID=yes
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+LockPersonality=yes
+# CGO(sqlite3) 需要可执行内存，这一项必须关闭
+MemoryDenyWriteExecute=no
+SystemCallFilter=@system-service
+SystemCallErrorNumber=EPERM
+
+# ProtectSystem=strict 会把整个文件系统挂成只读，这里放开必须可写的路径
+ReadWritePaths=/wttr.in/cache /wttr.in/log
+
+Environment=TZ=Asia/Shanghai
+Environment=GODEBUG=madvdontneed=1
+
+# CGO/sqlite 崩溃没必要落 core
+LimitCORE=0
+# 每个连接占一个句柄，高并发下需要放宽
+LimitNOFILE=65535
+
+# ── 资源上限 ──────────────────────────────────────────────────
+MemoryMax=2G
+CPUQuota=200%
+
+[Install]
+WantedBy=multi-user.target

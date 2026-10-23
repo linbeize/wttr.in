@@ -12,7 +12,7 @@ wttr.in 是一个面向命令行的天气预报服务，支持多种信息呈现
 
 线上服务见：[wttr.in](https://wttr.in)。
 
-[文档](https://wttr.in/:help) | [用法](#用法) | [单行输出](#单行输出) | [数据丰富输出格式-v2](#数据丰富输出格式-v2) | [地图视图](#地图视图-v3) | [输出格式](#其他输出格式) | [月相](#月相) | [国际化与本地化](#国际化与本地化) | [安装部署](#安装部署) | [反向代理](#反向代理)
+[文档](https://wttr.in/:help) | [用法](#用法) | [单行输出](#单行输出) | [数据丰富输出格式-v2](#数据丰富输出格式-v2) | [地图视图](#地图视图-v3) | [输出格式](#其他输出格式) | [月相](#月相) | [国际化与本地化](#国际化与本地化) | [安装部署](#安装部署) | [反向代理](#反向代理) | [systemd](#systemd-服务)
 
 ## 用法
 
@@ -780,6 +780,39 @@ proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 ```bash
 curl "http://127.0.0.1:8901/?debug=true"
 ```
+
+## systemd 服务
+
+生产环境用 systemd 托管，仓库内附现成的 unit 与配置示例：
+
+```bash
+sudo mkdir -p /wttr.in/{bin,cache,log,data,etc}
+sudo useradd -r -s /usr/sbin/nologin -d /wttr.in wttr
+
+sudo cp srv /wttr.in/bin/srv && sudo chmod 755 /wttr.in/bin/srv
+sudo cp bt_monitor.mmdb /wttr.in/data/
+sudo cp share/config/config.production.yaml /wttr.in/etc/config.yaml
+
+# 只有 cache/log 归 wttr 可写，其余归 root 只读
+sudo chown root:root /wttr.in /wttr.in/{bin,data,etc}
+sudo chown -R wttr:wttr /wttr.in/{cache,log}
+sudo chmod 600 /wttr.in/etc/config.yaml
+
+sudo cp share/systemd/wttr.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now wttr
+```
+
+默认监听 **8091**，开机自启，崩溃 3 秒后重启。日志走 journal：
+
+```bash
+journalctl -u wttr -f
+```
+
+unit 里带沙箱加固（`ProtectSystem=strict`，只放开 cache/log 可写）、
+`MemoryMax=2G`、`CPUQuota=200%`、`LimitNOFILE=65535`。
+
+细节与排错见 [doc/systemd.md](doc/systemd.md)。
 
 ## 致谢
 

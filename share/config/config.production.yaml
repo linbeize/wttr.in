@@ -1,0 +1,75 @@
+# wttr.in 生产配置示例（systemd 部署用，监听 8091）
+# 部署路径：/wttr.in，运行用户：wttr
+
+cache:
+  # 最终渲染结果缓存（HTML、JSON、PNG、文本等）
+  responses:
+    type: lru
+    size: 50000
+    ttl: 10m
+    enabled: true
+
+  # 上游天气数据缓存，落盘以便重启后复用
+  weather:
+    type: disk
+    dir: /wttr.in/cache/weather
+    ttl: 45m
+    max_size_mb: 2048
+    cleanup_interval: 15m
+    enabled: true
+
+ip:
+    ipCache: /wttr.in/cache/ip2l
+    ipCacheDb: /wttr.in/cache/geoip.db
+    ipCacheType: db
+    # 中国地区更准，仅 IPv4；文件缺失时自动跳过，不影响启动
+    btGeoip: /wttr.in/data/bt_monitor.mmdb
+    # 全球兜底 + IPv6。没放这个文件就留空。
+    geoip2: ""
+
+geo:
+    locationCache: /wttr.in/cache/loc
+    locationCacheDb: /wttr.in/cache/geoloc.db
+    locationCacheType: db
+    nominatim:
+        # 公开 Nominatim：免 key，lang 决定结果语言，中文地名靠它
+        - name: osm
+          type: osm
+          url: https://nominatim.openstreetmap.org/search
+          lang: zh
+
+weather:
+  wwo:
+    baseUrl: "http://wttr.in/{lat},{lon}?format=j1&lang={lang}"
+    key: "none"
+
+# 站点级默认值
+site:
+  defaultLang: "zh-cn"
+  defaultLocation: "北京"
+
+logging:
+    accessLog: /wttr.in/log/access.log
+    errorsLog: /wttr.in/log/errors.log
+    interval: 300
+
+server:
+    portHttp: 8091
+    portHttps: 0
+    # 反代设置：只有来自这些网段的 X-Forwarded-For / X-Real-IP 才可信。
+    # 代理与服务同机 → 回环；容器网段 → 172.17.0.0/16 之类。
+    # 留空则完全忽略转发头（服务直接对外时的安全默认值）。
+    trustedProxies:
+        - 127.0.0.1/32
+        - ::1/128
+
+renderer:
+    subprocess: []
+
+uplink:
+    address1: ""
+    address2: ""
+    address3: ""
+    address4: ""
+    timeout: 5
+    prefetchInterval: 0
