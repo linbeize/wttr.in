@@ -1,176 +1,170 @@
 
-*wttr.in — the right way to ~check~ `curl` the weather!*
+*wttr.in —— 用 `curl` 查天气的正确姿势！*
 
-wttr.in is a console-oriented weather forecast service that supports various information
-representation methods like terminal-oriented ANSI-sequences for console HTTP clients
-(curl, httpie, or wget), HTML for web browsers, or PNG for graphical viewers.
+wttr.in 是一个面向命令行的天气预报服务，支持多种信息呈现方式：给 curl、httpie、wget
+这类命令行 HTTP 客户端用的终端 ANSI 转义序列，给浏览器看的 HTML，以及给图形查看器用的 PNG。
 
-Originally started as a small project, a wrapper for [wego](https://github.com/schachmat/wego),
-intended to demonstrate the power of the console-oriented services,
-*wttr.in* became a popular weather reporting service, handling tens of millions[¹](#wttrin-usage-stats) of queries daily.
+它最初只是 [wego](https://github.com/schachmat/wego) 的一个小型封装，用来演示面向命令行的服务能有多强；
+后来 *wttr.in* 成长为一个流行的天气查询服务，每天处理上千万次查询[¹](#wttrin-使用统计)。
 
-> **This fork** (`linbeize/wttr.in`) is a Simplified-Chinese localization of the
-> original `chubin/wttr.in`, with the IP database switched to the China-accurate
-> **bt.cn-ip** mmdb. See [改造说明.md](改造说明.md) for the full list of changes.
+> **本仓库**（`linbeize/wttr.in`）是 `chubin/wttr.in` 的简体中文本地化分支，
+> IP 库已换成面向中国优化的 **bt.cn-ip** mmdb。完整改动清单见 [改造说明.md](改造说明.md)。
 
-You can see it running here: [wttr.in](https://wttr.in).
+线上服务见：[wttr.in](https://wttr.in)。
 
-[Documentation](https://wttr.in/:help) | [Usage](https://github.com/linbeize/wttr.in#usage) | [One-line output](https://github.com/linbeize/wttr.in#one-line-output) | [Data-rich output format](https://github.com/linbeize/wttr.in#data-rich-output-format-v2) | [Map view](https://github.com/linbeize/wttr.in#map-view-v3) | [Output formats](https://github.com/linbeize/wttr.in#different-output-formats) | [Moon phases](https://github.com/linbeize/wttr.in#moon-phases) | [Internationalization](https://github.com/linbeize/wttr.in#internationalization-and-localization) | [Installation](https://github.com/linbeize/wttr.in#installation)
+[文档](https://wttr.in/:help) | [用法](#用法) | [单行输出](#单行输出) | [数据丰富输出格式-v2](#数据丰富输出格式-v2) | [地图视图](#地图视图-v3) | [输出格式](#其他输出格式) | [月相](#月相) | [国际化与本地化](#国际化与本地化) | [安装部署](#安装部署)
 
-## Usage
+## 用法
 
-You can access the service from a shell or from a Web browser like this:
+在命令行或浏览器里都可以这样访问：
 
     $ curl wttr.in
-    Weather for City: Paris, France
+    北京 的天气
 
-         \   /     Clear
+         \   /     晴
           .-.      10 – 11 °C
        ― (   ) ―   ↑ 11 km/h
           `-’      10 km
          /   \     0.0 mm
 
 
-Here is an example weather report:
+完整天气预报示例：
 
-![Weather Report](share/pics/San_Francisco.png)
+![天气预报](share/pics/San_Francisco.png)
 
-Or in PowerShell:
+PowerShell 里也可以：
 
 ```PowerShell
 Invoke-RestMethod https://wttr.in
 ```
 
-Want to get the weather information for a specific location? You can add the desired location to the URL in your
-request like this:
+要查指定地点，把地点名拼到 URL 上即可：
 
-    $ curl wttr.in/London
-    $ curl wttr.in/Moscow
+    $ curl wttr.in/Beijing
+    $ curl wttr.in/Shanghai
     $ curl wttr.in/Salt+Lake+City
 
-If you omit the location name, you will get the report for your current location based on your IP address.
+省略地点名时，会根据你的 IP 地址自动定位到当前位置。
 
-Use 3-letter airport codes in order to get the weather information at a certain airport:
+也可以用三字机场代码查询某个机场的天气：
 
-    $ curl wttr.in/muc      # Weather for IATA: muc, Munich International Airport, Germany
-    $ curl wttr.in/ham      # Weather for IATA: ham, Hamburg Airport, Germany
+    $ curl wttr.in/pek      # 首都国际机场
+    $ curl wttr.in/pvg      # 浦东国际机场
 
-Let's say you'd like to get the weather for a geographical location other than a town or city - maybe an attraction
-in a city, a mountain name, or some special location:
+如果想查的不是城市，而是某个景点、山峰或其他特殊地点：
 
-	$ curl wttr.in/Vostok+Station
+	$ curl wttr.in/故宫
 	$ curl wttr.in/Eiffel+Tower
 	$ curl wttr.in/Kilimanjaro
 
-For these examples, you'll see a line below the weather forecast output that shows the geolocation
-results of looking up the location:
+这类查询会在预报下方多显示一行，给出地理编码的结果：
 
 	Location: Vostok Station, станция Восток, AAT, Antarctica [-78.4642714,106.8364678]
 	Location: Tour Eiffel, Paris, Île-de-France, 75007, France [48.8582602,2.29449905432]
 	Location: Kilimanjaro, Northern, Tanzania [-3.4762789,37.3872648]
 
-You can also use IP-addresses (direct) or domain names (prefixed with `@`) to specify a location:
+地点还可以直接写 IP 地址，或者用 `@` 前缀指定域名：
 
     $ curl wttr.in/@github.com
     $ curl wttr.in/@msu.ru
 
-To get detailed information online, you can access the [/:help](https://wttr.in/:help) page:
+想看详细说明，访问 [/:help](https://wttr.in/:help) 页面：
 
     $ curl wttr.in/:help
 
-### Weather Units
+### 单位
 
-By default the USCS units are used for the queries from the USA and the metric system for the rest of the world.
-You can override this behavior by adding `?u`, `?m` or `?M`   to a URL like this:
+默认情况下，来自美国的请求使用 USCS 单位，世界其他地区使用公制。
+可以用 `?u`、`?m` 或 `?M` 显式覆盖：
 
-    $ curl wttr.in/Amsterdam?u  # USCS (used by default in US)
-    $ curl wttr.in/Amsterdam?m  # metric (SI) (used by default everywhere except US)
-    $ curl wttr.in/Amsterdam?M  # metric (SI), but show wind speed in m/s
+    $ curl wttr.in/Amsterdam?u  # USCS（美国默认）
+    $ curl wttr.in/Amsterdam?m  # 公制（SI）（除美国外的默认值）
+    $ curl wttr.in/Amsterdam?M  # 公制（SI），但风速用 m/s 显示
 
-If you have several options to pass, write them without delimiters in between for the one-letter options,
-and use `&` as a delimiter for the long options with values:
+需要传多个选项时，单字母选项之间不加分隔符直接连写；
+带值的长选项则用 `&` 分隔：
 
     $ curl 'wttr.in/Amsterdam?m2&lang=nl'
 
-It would be a rough equivalent of `-m2 --lang nl` for the GNU CLI syntax.
+大致相当于 GNU 命令行语法里的 `-m2 --lang nl`。
 
-## Supported output formats and views
+## 支持的输出格式与视图
 
-wttr.in currently supports five output formats:
+wttr.in 目前支持六种输出格式：
 
-* ANSI for the terminal;
-* Plain-text for the terminal and scripts;
-* HTML for the browser;
-* PNG for the graphical viewers;
-* JSON for scripts and APIs;
-* Prometheus metrics for scripts and APIs.
+* ANSI —— 终端彩色输出；
+* 纯文本 —— 终端与脚本；
+* HTML —— 浏览器；
+* PNG —— 图形查看器；
+* JSON —— 脚本与 API；
+* Prometheus 指标 —— 监控系统与 API。
 
-The ANSI and HTML formats are selected based on the User-Agent string.
+ANSI 与 HTML 格式会根据 User-Agent 自动选择。
 
-To force plain text, which disables colors:
+强制使用纯文本（关闭颜色）：
 
     $ curl wttr.in/?T
 
-To restrict output to glyphs available in standard console fonts (e.g. Consolas and Lucida Console):
+限制输出只使用标准控制台字体（例如 Consolas、Lucida Console）中存在的字形：
 
     $ curl wttr.in/?d
 
-The PNG format can be forced by adding `.png` to the end of the query:
+在查询地址末尾加 `.png` 可强制使用 PNG 格式：
 
-    $ wget wttr.in/Paris.png
+    $ wget wttr.in/Beijing.png
 
-You can use all of the options with the PNG-format like in an URL, but you have
-to separate them with `_` instead of `?` and `&`:
+PNG 格式下同样可以使用所有选项，但选项之间要用 `_` 而不是 `?` 和 `&` 分隔：
 
-    $ wget wttr.in/Paris_0tqp_lang=fr.png
+    $ wget wttr.in/Beijing_0tqp_lang=zh-cn.png
 
-Useful options for the PNG format:
+PNG 格式的常用选项：
 
-* `t` for transparency (`transparency=150`);
-* transparency=0..255 for a custom transparency level.
+* `t` 表示透明（等价于 `transparency=150`）；
+* `transparency=0..255` 自定义透明程度。
 
-Transparency is a useful feature when weather PNGs are used to add weather data to pictures:
+把天气 PNG 叠到照片上时，透明背景非常有用：
 
     $ convert source.jpg <( curl wttr.in/Oymyakon_tqp0.png ) -geometry +50+50 -composite target.jpg
 
-In this example:
+上例中：
 
-* `source.jpg` - source file;
-* `target.jpg` - target file;
-* `Oymyakon` - name of the location;
-* `tqp0` - options (recommended).
+* `source.jpg` —— 源图；
+* `target.jpg` —— 目标图；
+* `Oymyakon` —— 地点名；
+* `tqp0` —— 选项（推荐写法）。
 
-![Picture with weather data](https://pbs.twimg.com/media/C69-wsIW0AAcAD5.jpg)
+![带天气数据的图片](https://pbs.twimg.com/media/C69-wsIW0AAcAD5.jpg)
 
-You can embed a special wttr.in widget, that displays the weather condition for the current or a selected location, into a HTML page using the [wttr-switcher](https://github.com/midzer/wttr-switcher). That is how it looks like: [wttr-switcher-example](https://midzer.github.io/wttr-switcher/) or on a real world web site: https://feuerwehr-eisolzried.de/.
+借助 [wttr-switcher](https://github.com/midzer/wttr-switcher)，可以把显示当前或指定地点天气的小组件
+嵌入 HTML 页面。效果见：[wttr-switcher 示例](https://midzer.github.io/wttr-switcher/)，
+真实站点案例：https://feuerwehr-eisolzried.de/。
 
-![Embedded wttr.in example at feuerwehr-eisolzried.de](https://user-images.githubusercontent.com/3875145/65265457-50eac180-db11-11e9-8f9b-2e1711dfc436.png)
+![feuerwehr-eisolzried.de 上的 wttr.in 嵌入示例](https://user-images.githubusercontent.com/3875145/65265457-50eac180-db11-11e9-8f9b-2e1711dfc436.png)
 
-## One-line output
+## 单行输出
 
-One-line output format is convenient to be used to show weather info
-in status bar of different programs, such as *tmux*, *weechat*, etc.
+单行输出适合把天气塞进 *tmux*、*weechat* 等程序的状态栏。
 
-For one-line output format, specify additional URL parameter `format`:
+使用 `format` 参数即可得到单行输出：
 
 ```
 $ curl wttr.in/Nuremberg?format=3
 Nuremberg: 🌦 +11⁰C
 ```
 
-Available preconfigured formats: 1, 2, 3, 4 and the custom format using the percent notation (see below).
-* 1: Current weather at location: `🌦 +11⁰C`
-* 2: Current weather at location with more details: `🌦   🌡️+11°C 🌬️↓4km/h`
-* 3: Name of location and current weather at location: `Nuremberg: 🌦 +11⁰C`
-* 4: Name of location and current weather at location with more details: `Nuremberg: 🌦   🌡️+11°C 🌬️↓4km/h`
+内置的预设格式有 1、2、3、4，也可以用百分号记法自定义（见下文）。
+* 1：地点 + 当前天气：`🌦 +11⁰C`
+* 2：地点 + 当前天气（含更多细节）：`🌦   🌡️+11°C 🌬️↓4km/h`
+* 3：地点名 + 当前天气：`Nuremberg: 🌦 +11⁰C`
+* 4：地点名 + 当前天气（含更多细节）：`Nuremberg: 🌦   🌡️+11°C 🌬️↓4km/h`
 
-You can specify multiple locations separated with `:` (for repeating queries):
+用 `:` 分隔可以指定多个地点（重复查询）：
 
 ```
 $ curl wttr.in/Nuremberg:Hamburg:Berlin?format=3
 Nuremberg: 🌦 +11⁰C
 ```
-Or to process all this queries at once:
+或一次性批量查询：
 
 ```
 $ curl -s 'wttr.in/{Nuremberg,Hamburg,Berlin}?format=3'
@@ -179,38 +173,38 @@ Hamburg: 🌦 +8⁰C
 Berlin: 🌦 +8⁰C
 ```
 
-To specify your own custom output format, use the special `%`-notation:
+自定义输出格式使用 `%` 记法：
 
 ```
-    c    Weather condition,
-    C    Weather condition textual name,
-    x    Weather condition, plain-text symbol,
-    h    Humidity,
-    t    Temperature (Actual),
-    f    Temperature (Feels Like),
-    H    Temperature (High),
-    L    Temperature (Low),
-    w    Wind,
-    l    Location,
-    m    Moon phase 🌑🌒🌓🌔🌕🌖🌗🌘,
-    M    Moon day,
-    p    Precipitation (mm/3 hours),
-    P    Pressure (hPa),
-    e    Dew point,
-    u    UV index (1-12),
+    c    天气状况
+    C    天气状况（文字名称）
+    x    天气状况（纯文本符号）
+    h    湿度
+    t    温度（实际）
+    f    温度（体感）
+    H    最高温
+    L    最低温
+    w    风
+    l    地点
+    m    月相 🌑🌒🌓🌔🌕🌖🌗🌘
+    M    月龄
+    p    降水量（mm/3 小时）
+    P    气压（hPa）
+    e    露点
+    u    紫外线指数（1-12）
 
-    D    Dawn*,
-    S    Sunrise*,
-    z    Zenith*,
-    s    Sunset*,
-    d    Dusk*,
-    T    Current time*,
-    Z    Local timezone.
+    D    黎明*
+    S    日出*
+    z    正午*
+    s    日落*
+    d    黄昏*
+    T    当前时间*
+    Z    本地时区
 
-(*times are shown in the local timezone)
+（* 时间以当地时区显示）
 ```
 
-So, these two calls are the same:
+所以下面两条命令等价：
 
 ```
     $ curl wttr.in/London?format=3
@@ -219,55 +213,51 @@ So, these two calls are the same:
     London: ⛅️ +7⁰C
 ```
 
-## Domains & Reliability
+## 域名与可靠性
 
-- **Primary**: [wttr.in](https://wttr.in)
-- **Fallback**: [wttr.is](https://wttr.is) — **fully equivalent drop-in replacement**
+- **主域名**：[wttr.in](https://wttr.in)
+- **备用域名**：[wttr.is](https://wttr.is) —— **完全等价的直接替换方案**
 
-You can safely use `wttr.is` anywhere you currently use `wttr.in`.  
-Both domains are served from the same backend and kept in sync.
+凡是用到 `wttr.in` 的地方都可以换成 `wttr.is`。
+两个域名由同一套后端提供服务，并保持同步。
 
-We recommend using `wttr.is` in scripts, status bars, monitoring tools, and CI/CD pipelines for improved reliability.
+建议在脚本、状态栏、监控工具和 CI/CD 流水线中使用 `wttr.is`，以获得更好的可用性。
 
-## Integrations
+## 集成
 
-Thanks to the ease of integrating *wttr.in* into any program, there are a
-plethora of popular integrations across various libraries, programming
-languages, and systems.
+得益于 *wttr.in* 极易集成，各种库、编程语言和系统里都有大量流行的集成方案。
 
-*wttr.in* is compatible with:
+*wttr.in* 可集成到：
 
-* terminal managers,
-* window managers,
-* editors,
-* chat clients,
+* 终端管理器，
+* 窗口管理器，
+* 编辑器，
+* 聊天客户端，
 
-and more, these integrations enhance workflow efficiency by embedding weather information directly into user interfaces.
+等等。这些集成把天气信息直接嵌进界面，提升了工作流的效率。
 
-See the full list of integrations here: [wttr.in integrations](doc/integrations.md)
-and some of them below.
+完整列表见：[wttr.in 集成清单](doc/integrations.md)，下面列举其中一部分。
 
 ### tmux
 
-When using in `tmux.conf`, you have to escape `%` with `%`, i.e. write there `%%` instead of `%`.
+在 `tmux.conf` 中使用时，`%` 需要用 `%` 转义，也就是写成 `%%`。
 
-The output does not contain new line by default, when the %-notation is used, but it does contain it when preconfigured format (`1`,`2`,`3` etc.)
-are used. To have the new line in the output when the %-notation is used, use '\n' and single quotes when doing a query from the shell.
+使用 `%` 记法时输出默认不含换行，而使用预设格式（`1`、`2`、`3` 等）时会带上换行。
+若要在 `%` 记法下也输出换行，写 `\n`，并在 shell 里用单引号包裹查询。
 
-In programs, that are querying the service automatically (such as tmux), it is better to use some reasonable update interval. In tmux, you can configure it with `status-interval`.
+对于会自动轮询的程序（例如 tmux），最好设置一个合理的刷新间隔。tmux 里用 `status-interval` 配置。
 
-If several, `:` separated locations, are specified in the query, specify update period
-as an additional query parameter `period=`:
+如果查询里用 `:` 指定了多个地点，需要额外传入 `period=` 参数指定刷新周期：
 ```
 set -g status-interval 60
 WEATHER='#(curl -s wttr.in/London:Stockholm:Moscow\?format\="%%l:+%%c%%20%%t%%60%%w&period=60")'
 set -g status-right "$WEATHER ..."
 ```
-![wttr.in in tmux status bar](https://wttr.in/files/example-tmux-status-line.png)
+![tmux 状态栏中的 wttr.in](https://wttr.in/files/example-tmux-status-line.png)
 
 ### WeeChat
 
-To embed in to an IRC ([WeeChat](https://github.com/weechat/weechat)) client's existing status bar:
+嵌入 IRC 客户端 [WeeChat](https://github.com/weechat/weechat) 的现有状态栏：
 
 ```
 /alias add wttr /exec -pipe "/mute /set plugins.var.wttr" url:wttr.in/Montreal?format=%l:+%c+%f+%h+%p+%P+%m+%w+%S+%s;/wait 3 /item refresh wttr
@@ -277,12 +267,12 @@ To embed in to an IRC ([WeeChat](https://github.com/weechat/weechat)) client's e
 /eval /set weechat.startup.command_after_plugins ${weechat.startup.command_after_plugins};/wttr
 /wttr
 ```
-![wttr.in in WeeChat status bar](https://i.imgur.com/XkYiRU7.png)
+![WeeChat 状态栏中的 wttr.in](https://i.imgur.com/XkYiRU7.png)
 
 
 ### conky
 
-Conky usage example:
+conky 用法示例：
 
 ```
 ${texeci 1800 curl wttr.in/kyiv_0pq_lang=uk.png
@@ -290,26 +280,25 @@ ${texeci 1800 curl wttr.in/kyiv_0pq_lang=uk.png
 ${image $HOME/.config/conky/out.png -p 0,0}
 ```
 
-![wttr.in in conky](https://user-images.githubusercontent.com/3875145/172178453-9e9ed9e3-9815-426a-9a21-afdd6e279fc8.png)
+![conky 中的 wttr.in](https://user-images.githubusercontent.com/3875145/172178453-9e9ed9e3-9815-426a-9a21-afdd6e279fc8.png)
 
 
 ### IRC
 
-IRC integration example:
+IRC 集成示例：
 
 * https://github.com/OpenSourceTreasure/Mirc-ASCII-weather-translate-pixel-editor
 
-### Emojis support
+### Emoji 支持
 
-To see emojis in terminal, you need:
+要在终端里看到 emoji，需要满足两个条件：
 
-1. Terminal support for emojis (was added to Cairo 1.15.8);
-2. Font with emojis support.
+1. 终端支持 emoji（Cairo 1.15.8 起已支持）；
+2. 使用带 emoji 字形的字体。
 
-For the emoji font, we recommend *Noto Color Emoji*, and a good alternative option would be the *Emoji One* font;
-both of them support all necessary emoji glyphs.
+emoji 字体推荐 *Noto Color Emoji*，替代方案是 *Emoji One* 字体，两者都覆盖了所需的全部 emoji 字形。
 
-Font configuration:
+字体配置：
 
 ```xml
 $ cat ~/.config/fontconfig/fonts.conf
@@ -337,14 +326,13 @@ $ cat ~/.config/fontconfig/fonts.conf
 </fontconfig>
 ```
 
-(to apply the configuration, run `fc-cache -f -v`).
+（改完执行 `fc-cache -f -v` 使其生效）。
 
-In some cases, `tmux` and the terminal understanding of some emoji characters may differ, which may
-cause strange effects similar to that described in #579.
+某些情况下，`tmux` 与终端对个别 emoji 字符的理解会不一致，可能出现 #579 里描述的异常现象。
 
 ### Squeak
 
-To embed into the world main docking bar:
+嵌入 Squeak 主停靠栏：
 
 ```smalltalk
 wttr := (UpdatingStringMorph on: [(WebClient httpGet: 'https://wttr.in/?format=%20%20%l:%20%C+%t') content] selector: #value)
@@ -355,117 +343,116 @@ dockingBar := World mainDockingBars first.
 dockingBar addMorph: wttr after: (dockingBar findA: ClockMorph).
 ```
 
-![wttr.in integration in the Squeak world main docking bar](https://github.com/user-attachments/assets/4c2762b0-77ae-41a8-98db-3eb310d073bd)
+![Squeak 主停靠栏中的 wttr.in](https://github.com/user-attachments/assets/4c2762b0-77ae-41a8-98db-3eb310d073bd)
 
-## Data-rich output format (v2)
+## 数据丰富输出格式 v2
 
-In the experimental data-rich output format, that is available under the view code `v2`,
-a lot of additional weather and astronomical information is available:
+这个实验性的数据丰富格式对应视图代码 `v2`，提供大量额外的天气与天文信息：
 
-* Temperature, and precipitation changes forecast throughout the days;
-* Moonphase for today and the next three days;
-* The current weather condition, temperature, humidity, wind speed and direction, pressure;
-* Timezone;
-* Dawn, sunrise, noon, sunset, dusk time for he selected location;
-* Precise geographical coordinates for the selected location.
-
-```
-  $ curl v2.wttr.in/München
-```
-
-or
+* 全天温度与降水的逐时变化曲线；
+* 今天及未来三天的月相；
+* 当前天气状况、温度、湿度、风速风向、气压；
+* 时区；
+* 所选地点的黎明、日出、正午、日落、黄昏时间；
+* 所选地点的精确经纬度。
 
 ```
-  $ curl wttr.in/München?format=v2
+  $ curl v2.wttr.in/Beijing
 ```
 
-or, if you prefer Nerd Fonts instead of Emoji, `v2d` (day) or `v2n` (night):
+或者
 
 ```
-  $ curl v2d.wttr.in/München
+  $ curl wttr.in/Beijing?format=v2
+```
+
+如果不想用 Emoji，而偏好 Nerd Fonts，可以用 `v2d`（白天）或 `v2n`（夜间）：
+
+```
+  $ curl v2d.wttr.in/Beijing
 ```
 
 
-![data-rich output format](https://wttr.in/files/example-wttr-v2.png)
+![数据丰富输出格式](https://wttr.in/files/example-wttr-v2.png)
 
-(The mode is experimental, and it has several limitations currently:
+（该模式仍属实验性质，目前有几处限制：
 
-* It works only in terminal;
-* Only English is supported).
+* 仅支持终端；
+* 部分内容仅支持英文）。
 
-Currently, you need some tweaks for some terminals, to get the best possible visualization.
+部分终端需要做些调整才能得到最佳视觉效果。
 
 ### URXVT
 
-Depending on your configuration you might be taking all steps, or only a few. URXVT currently doesn't support emoji related fonts, but we can get almost the same effect using *Font-Symbola*. So add to your `.Xresources` file the following line:
+视你的配置而定，下面的步骤可能全都要做，也可能只做一部分。URXVT 目前不支持 emoji 相关字体，
+但用 *Font-Symbola* 可以获得几乎相同的效果。在 `.Xresources` 里加入这一行：
 ```
     xft:symbola:size=10:minspace=False
 ```
-You can add it _after_ your preferred font and it will only show up when required.
-Then, if you see or feel like you're having spacing issues, add this: `URxvt.letterSpace: 0`
-For some reason URXVT sometimes stops deciding right the word spacing and we need to force it this way.
+把它放在你首选字体的**后面**，只在需要时才会用到。
+如果出现或感觉字距有问题，再加上 `URxvt.letterSpace: 0`。
+URXVT 有时会判断错单词间距，需要这样强制一下。
 
-The result, should look like:
+效果大致如下：
 
-![URXVT Emoji line](https://user-images.githubusercontent.com/24360204/63842949-1d36d480-c975-11e9-81dd-998d1329bd8a.png)
+![URXVT Emoji 行](https://user-images.githubusercontent.com/24360204/63842949-1d36d480-c975-11e9-81dd-998d1329bd8a.png)
 
-## Map view (v3)
+## 地图视图 v3
 
-In the experimental map view, that is available under the view code `v3`,
-weather information about a geographical region is available:
+这个实验性的地图视图对应视图代码 `v3`，提供某个地理区域的天气信息：
 
 ```
     $ curl v3.wttr.in/Bayern.sxl
 ```
 
-![Example of v3 map view](share/pics/San_Francisco.png)
+![v3 地图视图示例](share/pics/San_Francisco.png)
 
-or directly in browser:
+也可以直接在浏览器打开：
 
 *   https://v3.wttr.in/Bayern
 
-The map view currently supports three formats:
+地图视图目前支持三种格式：
 
-* PNG (for browser and messengers);
-* Sixel (terminal inline images support);
-* IIP (terminal with iterm2 inline images protocol support).
+* PNG（浏览器与即时通讯）；
+* Sixel（终端内联图片）；
+* IIP（支持 iterm2 内联图片协议的终端）。
 
-Terminal with inline images protocols support:
+各终端的内联图片协议支持情况：
 
-⟶ *Detailed article: [Images in terminal](doc/terminal-images.md)*
+⟶ *详见：[终端中的图片](doc/terminal-images.md)*
 
-| Terminal              | Environment    | Images support | Protocol |
+| 终端                   | 环境       | 图片支持 | 协议 |
 | --------------------- | --------- | ------------- | --------- |
-| uxterm                |   X11     |   yes         |   Sixel   |
-| mlterm                |   X11     |   yes         |   Sixel   |
-| kitty                 |   X11     |   yes         |   Kitty   |
-| wezterm               |   X11     |   yes         |   IIP     |
-| Darktile              |   X11     |   yes         |   Sixel   |
-| Jexer                 |   X11     |   yes         |   Sixel   |
-| GNOME Terminal        |   X11     |   [in-progress](https://gitlab.gnome.org/GNOME/vte/-/issues/253) |   Sixel   |
-| alacritty             |   X11     |   [in-progress](https://github.com/alacritty/alacritty/issues/910) |  Sixel   |
-| foot                  |  Wayland  |   yes         |   Sixel   |
-| DomTerm               |   Web     |   yes         |   Sixel   |
-| Yaft                  |   FB      |   yes         |   Sixel   |
-| iTerm2                |   Mac OS X|   yes         |   IIP     |
-| mintty                | Windows   |   yes         |   Sixel   |
-| Windows Terminal  |   Windows     |   [in-progress](https://github.com/microsoft/terminal/issues/448) |   Sixel   |
-| [RLogin](http://nanno.dip.jp/softlib/man/rlogin/) | Windows | yes         |   Sixel   |   |
+| uxterm                |   X11     |   支持         |   Sixel   |
+| mlterm                |   X11     |   支持         |   Sixel   |
+| kitty                 |   X11     |   支持         |   Kitty   |
+| wezterm               |   X11     |   支持         |   IIP     |
+| Darktile              |   X11     |   支持         |   Sixel   |
+| Jexer                 |   X11     |   支持         |   Sixel   |
+| GNOME Terminal        |   X11     |   [开发中](https://gitlab.gnome.org/GNOME/vte/-/issues/253) |   Sixel   |
+| alacritty             |   X11     |   [开发中](https://github.com/alacritty/alacritty/issues/910) |  Sixel   |
+| foot                  |  Wayland  |   支持         |   Sixel   |
+| DomTerm               |   Web     |   支持         |   Sixel   |
+| Yaft                  |   FB      |   支持         |   Sixel   |
+| iTerm2                |   Mac OS X|   支持         |   IIP     |
+| mintty                | Windows   |   支持         |   Sixel   |
+| Windows Terminal  |   Windows     |   [开发中](https://github.com/microsoft/terminal/issues/448) |   Sixel   |
+| [RLogin](http://nanno.dip.jp/softlib/man/rlogin/) | Windows | 支持         |   Sixel   |   |
 
 
-## Different output formats
+## 其他输出格式
 
-### JSON output
+### JSON 输出
 
-The JSON format is a feature providing access to *wttr.in* data through an easy-to-parse format, without requiring the user to create a complex script to reinterpret wttr.in's graphical output.
+JSON 格式让程序能以易解析的方式访问 *wttr.in* 的数据，无需自己写复杂脚本去解析 wttr.in 的图形化输出。
 
-To fetch information in JSON format, use the following syntax:
+获取 JSON 格式数据：
 
     $ curl wttr.in/Detroit?format=j1
 
-This will fetch information on the Detroit region in JSON format. The j1 format code is used to allow for the use of other layouts for the JSON output.
+这会以 JSON 返回底特律地区的信息。使用 `j1` 这个格式代码，是为了将来能给 JSON 输出换成其他版式。
 
-The result will look something like the following:
+返回结果大致如下：
 ```json
 {
 	"current_condition": [
@@ -501,21 +488,24 @@ The result will look something like the following:
 ...
 ```
 
-Most of these values are self-explanatory, aside from `weatherCode`. The `weatherCode` is an enumeration which you can find at either [the WorldWeatherOnline website](https://www.worldweatheronline.com/developer/api/docs/weather-icons.aspx) or [in the wttr.in source code](https://github.com/chubin/wttr.in/blob/master/lib/constants.py).
+除 `weatherCode` 外，大部分字段含义一看即知。`weatherCode` 是一套枚举，可在
+[WorldWeatherOnline 官网](https://www.worldweatheronline.com/developer/api/docs/weather-icons.aspx)
+或 [wttr.in 源码](https://github.com/chubin/wttr.in/blob/master/lib/constants.py) 中查到。
 
-A smaller version `format=j2` without hourly data is also available. Can work well for microcontrollers with limited memory.
+另有不含逐时数据的精简版本 `format=j2`，适合内存受限的单片机使用。
 
-### Prometheus Metrics Output
+### Prometheus 指标输出
 
-The [Prometheus](https://github.com/prometheus/prometheus) Metrics format is a feature providing access to *wttr.in* data through an easy-to-parse format for monitoring systems, without requiring the user to create a complex script to reinterpret wttr.in's graphical output.
+[Prometheus](https://github.com/prometheus/prometheus) 指标格式让监控系统能以易解析的方式访问
+*wttr.in* 的数据，无需自己写复杂脚本去解析 wttr.in 的图形化输出。
 
-To fetch information in Prometheus format, use the following syntax:
+获取 Prometheus 格式数据：
 
     $ curl wttr.in/Detroit?format=p1
 
-This will fetch information on the Detroit region in Prometheus Metrics format. The `p1` format code is used to allow for the use of other layouts for the Prometheus Metrics output.
+这会以 Prometheus 指标格式返回底特律地区的信息。使用 `p1` 格式代码，是为了将来能给输出换成其他版式。
 
-A possible configuration for Prometheus could look like this:
+Prometheus 的配置可以写成这样：
 
 ```yaml
     - job_name: 'wttr_in_detroit'
@@ -526,134 +516,135 @@ A possible configuration for Prometheus could look like this:
             format: ['p1']
 ```
 
-The result will look something like the following:
+返回结果大致如下：
 
 
     # HELP temperature_feels_like_celsius Feels Like Temperature in Celsius
     temperature_feels_like_celsius{forecast="current"} 7
     # HELP temperature_feels_like_fahrenheit Feels Like Temperature in Fahrenheit
     temperature_feels_like_fahrenheit{forecast="current"} 45
-    [truncated]
+    [已截断]
 ...
 
 
-## Moon phases
+## 月相
 
-wttr.in can also be used to check the phase of the Moon. This example shows how to see the current Moon phase
-in the full-output mode:
+wttr.in 也可以用来查月相。下面是在完整输出模式下查看当前月相的例子：
 
     $ curl wttr.in/Moon
 
-Get the moon phase for a particular date by adding `@YYYY-MM-DD`:
+加上 `@YYYY-MM-DD` 可以查指定日期的月相：
 
     $ curl wttr.in/Moon@2016-12-25
 
-The moon phase information uses [pyphoon](https://github.com/chubin/pyphoon) as its backend.
+月相计算使用 [pyphoon](https://github.com/chubin/pyphoon) 作为后端。
 
-To get the moon phase information in the one-line mode, use `%m`:
+单行模式下用 `%m` 获取月相：
 
     $ curl wttr.in/London?format=%m
     🌖
 
-Keep in mind that the Unicode representation of moon phases suffers 2 caveats:
+需要注意，用 Unicode 字符表示月相有两个固有缺陷：
 
-- With some fonts, the representation `🌘` is ambiguous, for it either seem
-  almost-shadowed or almost-lit, depending on whether your terminal is in
-  light mode or dark mode. Relying on colored fonts like `noto-fonts` works
-  around this problem.
+- 在某些字体下，`🌘` 的呈现是有歧义的：它看起来接近全暗还是接近全亮，
+  取决于你的终端处于浅色模式还是深色模式。改用 `noto-fonts` 这类彩色字体可以绕过该问题。
 
-- The representation `🌘` is also ambiguous, for it means "last quarter" in
-  northern hemisphere, but "first quarter" in souther hemisphere. It also means
-  nothing in tropical zones. This is a limitation that
-  [Unicode](https://www.unicode.org/L2/L2017/17304-moon-var.pdf) is aware about.
-  But it has not been worked around at `wttr.in` yet.
+- `🌘` 的含义同样有歧义：在北半球它表示「下弦月」，在南半球却表示「上弦月」，
+  在热带地区则没有意义。这是 [Unicode](https://www.unicode.org/L2/L2017/17304-moon-var.pdf)
+  已知的局限，而 wttr.in 目前尚未处理。
 
-See #247, #364 for the corresponding tracking issues,
-and [pyphoon#1](https://github.com/chubin/pyphoon/issues/1) for pyphoon. Any help is welcome.
+相关问题见 #247、#364，以及 pyphoon 的 [pyphoon#1](https://github.com/chubin/pyphoon/issues/1)。欢迎参与改进。
 
-## Internationalization and localization
+## 国际化与本地化
 
-wttr.in supports multilingual locations names that can be specified in any language in the world
-(it may be surprising, but many locations in the world don't have an English name).
+wttr.in 支持多语言地点名，可以用世界上任何语言书写
+（说来有点意外，但世界上很多地点并没有英文名）。
 
-The query string should be specified in Unicode (hex-encoded or not). Spaces in the query string
-must be replaced with `+`:
+查询串应以 Unicode 书写（可用十六进制转义，也可直接写）。查询串里的空格必须替换成 `+`：
 
     $ curl wttr.in/станция+Восток
-    Weather report: станция Восток
+    天气预报： станция Восток
 
-                   Overcast
+                   阴
           .--.     -65 – -47 °C
        .-(    ).   ↑ 23 km/h
       (___.__)__)  15 km
                    0.0 mm
 
-The language used for the output (except the location name) does not depend on the input language
-and it is either English (by default) or the preferred language of the browser (if the query
-was issued from a browser) that is specified in the query headers (`Accept-Language`).
+输出所用的语言（地点名除外）与输入语言无关，只取决于两种来源：默认的英语，
+或者浏览器请求头 `Accept-Language` 中声明的首选语言（当请求来自浏览器时）。
 
-The language can be set explicitly when using console clients by using command-line options like this:
+用命令行客户端时，可以通过命令行选项显式指定语言：
 
     curl -H "Accept-Language: fr" wttr.in
     http GET wttr.in Accept-Language:ru
 
-The preferred language can be forced using the `lang` option:
+也可以用 `lang` 选项强制指定：
 
     $ curl wttr.in/Berlin?lang=de
+    $ curl wttr.in/Beijing?lang=zh-cn      # 简体中文
+    $ curl wttr.in/Taipei?lang=zh-tw       # 繁体中文
 
-The third option is to choose the language using the DNS name used in the query:
+第三种方式是用查询所用的 DNS 名来选择语言：
 
     $ curl de.wttr.in/Berlin
 
-wttr.in is currently translated into 74 languages, and the number of supported languages is constantly growing.
+wttr.in 目前已被翻译成 75 种语言，且支持的语言数量还在持续增加。
 
-See [/:translation](https://wttr.in/:translation) to learn more about the translation process,
-to see the list of supported languages and contributors, or to know how you can help to translate wttr.in
-in your language.
+翻译流程、支持语言清单、贡献者名单，以及如何帮助翻译你的母语，见
+[/:translation](https://wttr.in/:translation)。
 
-![Queries to wttr.in in various languages](https://pbs.twimg.com/media/C7hShiDXQAES6z1.jpg)
+![各种语言的 wttr.in 查询](https://pbs.twimg.com/media/C7hShiDXQAES6z1.jpg)
 
-## Installation
+## 安装部署
 
-This guide explains how to install wttr.in from the source code.
+本指南说明如何从源码安装 wttr.in。
 
-It is implemented as a *single static binary* with all assets (including fonts for PNG rendering) embedded inside.
-It has *zero runtime dependencies*, supports both HTTP and HTTPS natively,
-and does not need nginx, Apache, or any other web server in front.
+它是一个**单一静态二进制**，所有资源（包括 PNG 渲染所需的字体）都已内嵌其中。
+它**没有运行时依赖**，原生支持 HTTP 与 HTTPS，前面不需要 nginx、Apache 或任何其他 Web 服务器。
 
-At the end of this installation you will have:
+按本文装完后，你会得到：
 
-- A clean, self-contained wttr.in service installed in `/wttr.in/`
-- A single executable binary (`/wttr.in/bin/srv`)
-- Configured caching, IP geolocation (GeoIP2), and location resolution (OpenCage)
-- The service, fully equivalent to the public wttr.in, is running on port 8080 (HTTP) and is ready to serve weather reports.
+- 一套干净、自包含的 wttr.in 服务，安装在 `/wttr.in/`
+- 一个可执行文件（`/wttr.in/bin/srv`）
+- 已配置好缓存、IP 地理位置（GeoIP2）与地点解析（OpenCage）
+- 服务运行在 8080 端口（HTTP），功能与公开的 wttr.in 完全等价，可直接提供天气预报
 
-### System Preparation
+### 系统准备
 
 ```bash
 sudo mkdir -p /wttr.in/{bin,cache,log,data,etc}
 ```
 
-If you want to run the server as a dedicated user (recommended):
+如果希望用专用用户运行服务（推荐）：
 ```bash
 sudo useradd -r -s /bin/false -u 1000 wttr
 sudo chown -R wttr:wttr /wttr.in
 ```
 
-### Download GeoIP2 Database
+### 下载 IP 数据库
 
-For automated IPs resolution:
+用于自动 IP 定位：
 
-- Register at [MaxMind](https://www.maxmind.com) and download **GeoLite2-City.mmdb**.
-- Place it at: `/wttr.in/data/GeoLite2-City.mmdb`
+**方式一：bt.cn-ip（推荐，中国地区更准确）**
 
-### Build the Binary
+- 获取 **bt_monitor.mmdb**（bt.cn-ip 格式），放到：`/wttr.in/data/bt_monitor.mmdb`
+- 该库为 IPv4 专用，IPv6 会自动回退到 GeoIP2
+
+**方式二：MaxMind GeoLite2**
+
+- 在 [MaxMind](https://www.maxmind.com) 注册并下载 **GeoLite2-City.mmdb**
+- 放到：`/wttr.in/data/GeoLite2-City.mmdb`
+
+两个库可以同时配置：bt.cn-ip 优先，GeoIP2 作为全球与 IPv6 的兜底。
+
+### 编译
 
 ```bash
 git clone https://github.com/linbeize/wttr.in.git
 cd wttr.in
 
-# Build-time fonts (embedded in final binary)
+# 编译期字体（会内嵌进最终二进制）
 sudo apt-get install -y --no-install-recommends \
   fontconfig fonts-dejavu-core fonts-noto-core fonts-noto-cjk \
   fonts-wqy-zenhei fonts-symbola fonts-motoya-l-cedar fonts-lexi-gulim
@@ -661,45 +652,57 @@ sudo apt-get install -y --no-install-recommends \
 bash build.sh build
 ```
 
-### Install the Binary
+注意：`go.mod` 要求 Go 1.25 及以上，用旧版本会直接报错。
+`build.sh` 会先把 `share/` 复制到 `internal/assets/embed/` 供 `//go:embed` 使用。
+
+### 安装二进制
 
 ```bash
 sudo cp srv /wttr.in/bin/srv
 sudo chown wttr:wttr /wttr.in/bin/srv
 ```
 
-### Configuration
+### 配置
 
-Create `/wttr.in/config.yaml`:
+创建 `/wttr.in/config.yaml`：
 
 ```yaml
 
 cache:
-  # Cache for final rendered responses (HTML, JSON, PNG, text, etc.)
+  # 最终渲染结果缓存（HTML、JSON、PNG、文本等）
   responses:
     type: lru
-    size: 50000          # your previous LRU size
-    ttl: 10m             # short TTL for rendered output
+    size: 50000
+    ttl: 10m             # 渲染结果用较短的 TTL
     enabled: true
 
-  # Cache for raw weather data from upstream APIs (WWO, etc.)
+  # 上游 API 原始天气数据缓存（WWO 等）
   weather:
     type: disk
     dir: /var/cache/wttr.in/weather
     ttl: 45m
-    max_size_mb: 2048     # 2 GB soft limit
+    max_size_mb: 2048     # 2 GB 软上限
     cleanup_interval: 15m
     enabled: true
 
 ip:
   ipCacheDb: /wttr.in/cache/geoip.db
   ipCacheType: db
+  # bt.cn-ip：中国地区更准，仅 IPv4，优先使用
+  btGeoip: /wttr.in/data/bt_monitor.mmdb
+  # GeoIP2：全球兜底，同时覆盖 IPv6
   geoip2: /wttr.in/data/GeoLite2-City.mmdb
 
 geo:
   locationCacheDb: /wttr.in/cache/geoloc.db
   locationCacheType: db
+  # 地理编码器按顺序尝试，第一个命中即返回
   nominatim:
+    # 公开 Nominatim：免 key，lang 决定结果语言，中文地名靠它
+    - name: osm
+      type: osm
+      url: https://nominatim.openstreetmap.org/search
+      lang: zh
     - name: opencage
       type: opencage
       url: https://api.opencagedata.com/geocode/v1/json
@@ -708,7 +711,12 @@ geo:
 weather:
   wwo:
     baseUrl: "http://wttr.in/{lat},{lon}?format=j1&lang={lang}"
-    # key: "YOUR_WWO_TOKEN"   # optional
+    # key: "YOUR_WWO_TOKEN"   # 可选
+
+# 站点级默认值
+site:
+  defaultLang: "zh-cn"        # 请求未指定语言时使用
+  defaultLocation: "北京"      # 请求无地点且 IP 定位不到时使用
 
 server:
   portHttp: 8080
@@ -717,34 +725,42 @@ server:
   # tlsKeyFile: /wttr.in/etc/privkey.pem
 ```
 
-The configuration implies the use of OpenCage for geolocation (a token is required) and wttr.in as the source of weather data.
-If you want to use *WorldWeatherOnline*, you must register there to obtain a token and set the `baseUrl` accordingly.
+上述配置默认用 OpenCage 做地理编码（需要 token），并用 wttr.in 作为天气数据源。
+若想改用 *WorldWeatherOnline*，需在其官网注册获取 token，并相应修改 `baseUrl`。
 
+### 启动服务
 
-### Running the Service
 ```bash
 cd /wttr.in
-sudo -u wttr ./bin/srv --config config.yaml
+sudo -u wttr ./bin/srv srv config.yaml
 ```
 
-You can now access your instance at `http://your-server:8080` (e.g. `http://your-server:8080/London`).
+现在就可以通过 `http://你的服务器:8080` 访问自己的实例了（例如 `http://你的服务器:8080/London`）。
 
-For production, create a systemd service. Cache and logs are stored under `/wttr.in/cache` and `/wttr.in/log`.
+生产环境建议配一个 systemd 服务。缓存与日志分别位于 `/wttr.in/cache` 和 `/wttr.in/log`。
 
-## Acknowledgments
+## 致谢
 
 ### OpenCage
 
-![opencage logo](share/pics/opencage-logo.png)
+![opencage 标志](share/pics/opencage-logo.png)
 
-The wttr.in project thanks **[OpenCage](https://opencagedata.com/)** for geolocation data provided through the **OpenCage Geocoding API**.
+wttr.in 项目感谢 **[OpenCage](https://opencagedata.com/)** 通过 **OpenCage Geocoding API** 提供地理位置数据。
 
-OpenCage is used to resolve place names — cities, landmarks, stations, and other locations — into coordinates and normalized addresses. That lookup is what makes queries such as `wttr.in/London` and `wttr.in/~Eiffel+Tower` possible.
+OpenCage 负责把地名（城市、地标、车站等）解析成坐标与规范化地址。正是这项能力让
+`wttr.in/London`、`wttr.in/~Eiffel+Tower` 这类查询成为可能。
 
-We are grateful to the OpenCage team for reliable geocoding, an accessible API, and support for open tools that bring weather reports to the terminal.
+感谢 OpenCage 团队提供稳定可靠的地理编码服务、易用的 API，以及对开放工具的支持，
+让天气预报得以走进终端。
 
-## wttr.in usage stats
+### 上游项目
 
-As of April 2026, *wttr.in* handles around 100 million queries per day from 400,000 to 450,000 users, according to the access logs.
+本项目基于 [chubin/wttr.in](https://github.com/chubin/wttr.in) 二次开发，
+并依赖 [wego](https://github.com/schachmat/wego)、[pyphoon](https://github.com/chubin/pyphoon)
+等开源项目。
 
-![wttr.in usage stats](share/stats/stats.png)
+## wttr.in 使用统计
+
+截至 2026 年 4 月，根据访问日志，*wttr.in* 每天处理约一亿次查询，来自 40 万到 45 万名用户。
+
+![wttr.in 使用统计](share/stats/stats.png)
